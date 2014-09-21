@@ -1,0 +1,810 @@
+#!/usr/bin/perl -w
+
+=pod
+
+=head1 Name
+
+cfdivisions - A CFEngine3 module for using a component based promise management
+
+=head1 SYNOPSIS
+
+cfdivisions [--inputs inputspath] [--basedir dir] [--prefix libname] [--promises promises1.cf,..] [--debug]
+
+=head1 Description
+
+A CFEngine3 module that manages complex filesystem structures of promises files, promises libraries and ressources associated to the promises. Promises files and related resources are divide into component like folder structures called B<divisions>. These B<divisions> can declare dependencies to other B<divisions>. B<cfdivisions> enables CFEngine to load automatically all B<divisions> according to the defined component dependencies and execute the B<division> defined bundlesequences in the expected logical order.
+
+Using B<divisions> based CFEngine promises introduces a new mechanism for designing code with 
+
+=over
+
+=item *
+
+high cohesion by keeping things together that work together
+
+=item *
+
+low coupling by setting apart things that work together less likely.
+
+B<Divisions> can be used as a mechnism of defining component libraries.
+
+=back
+
+=head1 Options
+
+--inputs   : alternative path to the CFEngines inputs-folder
+
+--basedir  : root folder of a division-library within the cfengines inputs-folder
+
+--prefix   : namespace/library prefix for generated classes and variables.
+             Default value is "division"
+
+--promises : comma separated ordered list of alternative names of B<division promises files> defining a division entry point for promises execution
+             Default is 'division-promises.cf'
+
+--verbose  : show generate variables
+
+--debug    : show internal data structures for verification of execution
+
+=cut
+
+use File::Find;
+use File::Spec;
+use Getopt::Long;
+
+my @errors;
+my $arg_basedir       = "";
+my $arg_prefix        = "division";
+my $arg_inputs        = "/var/cfengine/inputs";
+my $arg_promises      = "division-promises.cf";
+my $arg_verbose;
+my $arg_debug;
+
+GetOptions (
+    "basedir=s"  => \$arg_basedir,
+    "inputs:s"   => \$arg_inputs,
+    "promises:s" => \$arg_promises,
+    "prefix:s"   => \$arg_prefix,
+    "verbose"    => \$arg_verbose,
+    "debug"      => \$arg_debug,
+    );
+
+sub errors {
+    return 0 if scalar(@errors)==0;
+
+    # Print if library has some kind of error
+    print "+".$arg_prefix."_error\n";
+
+    # Print all error strings as text and as variable definitions
+    my $num=0;
+    foreach my $error (@errors) {
+	print "cfdivisions error $num in library '$arg_prefix': $error\n";
+	print "=".$arg_prefix."_error[".$num."]=\"".$error."\"\n";	
+	$num++;
+    }
+    return 1;
+}
+
+unless (-d $arg_inputs) {
+    push @errors,"Unknown inputs directory path: $arg_inputs";    
+}
+exit 1 if errors();
+
+my @division_promise_files = split /,/,$arg_promises;
+my $cf_inputs_dir          = $arg_inputs;
+my $base_dir               = File::Spec->catdir($cf_inputs_dir,$arg_basedir);
+
+unless (-d $base_dir) {
+    push @errors,"Unknown base directory '$arg_basedir' path: $base_dir";    
+}
+exit 1 if errors();
+
+sub canonizeDivisionname {
+    my $name = shift;
+    $name    =~ s/\W/_/g;
+    $name    =~ s/^_+//;
+    return $name
+}
+
+my %divisions;
+my %divisionpaths;
+my %divisionfiles;
+
+sub findDivisions {
+    my @folders = split(/$arg_basedir/,$File::Find::dir);
+    my $folder  = $folders[1];
+    my $file    = $_;
+    foreach my $promise_file (@division_promise_files) {
+	next unless $file eq $promise_file;
+	my $divname = canonizeDivisionname($folder);    
+	$divisions{$divname}     = $folder;
+	$divisionpaths{$divname} = $File::Find::dir;
+	$divisionfiles{$divname} = $file;
+	return;
+    }
+};
+
+my %bundlesequences;
+my %dependencies;
+my $parsed_bundlesequence_token;
+my $parsed_depends_token;
+
+sub parsePromiseFileLine {
+    my $line     = shift;
+    my $division = shift;
+    chomp $line;
+    return unless $line =~ /#/; # only comment lines are parsed
+    if ($line =~ /\*cfdivisions_bundlesequence/) {
+	my @allbs   = split(/\*cfdivisions_bundlesequence\s*=\s*/);
+	if(scalar(@allbs)>1) {
+	    my $bsvalue = pop @allbs; # get value side
+	    $bsvalue    =~ s/\s+//g; # remove spaces
+	    $bundlesequences{$division}  = [split(/,/,$bsvalue)];
+	    $parsed_bundlesequence_token = 1;
+	} else {
+	    $bundlesequences{$division} = [];
+	}
+    }
+    if ($line =~ /\*cfdivisions_depends/) {
+	my @alldep   = split(/\*cfdivisions_depends\s*=\s*/);
+	if(scalar(@alldep)>1) {
+	    my $depvalue = pop @alldep; # get value side
+	    $depvalue    =~ s/\s+//g; # remove spaces
+	    $dependencies{$division} = [
+		map { canonizeDivisionname($_) } split(/,/,$depvalue)
+		];
+	    $parsed_depends_token    = 1;
+	}
+    }    
+}
+
+sub readDivisionPromiseFiles {
+    foreach my $division (keys %divisions) {
+	my $path = File::Spec->catfile(
+	    $base_dir,
+	    $divisions{$division},
+	    $divisionfiles{$division});
+	$parsed_bundlesequence_token = undef;
+	$parsed_depends_token        = undef;
+	open FILE,"<".$path;
+	while (<FILE>) {
+	    unless ($parsed_bundlesequence_token and $parsed_depends_token) {
+		parsePromiseFileLine($_,$division);
+	    } else {
+		last;
+	    }
+	}
+	close FILE;
+    }
+}
+
+my @divisionorder;
+my %divisionordered;
+
+# checklist datastructures for preventing circular division dependencies
+my %investigated;
+my @investigated_stack;
+
+#
+# Investigate the order of divisions for later handling of the total bundlesequence
+#
+sub investigateDepOrder {
+    my ($divname)=shift;
+    return if $divisionordered{$divname};
+
+    push @investigated_stack,$divname;
+    if ($investigated{$divname}) {
+	push @errors,"Circular division dependencies:".join(",",@investigated_stack);
+	pop @investigated_stack;
+	return ;
+    }
+    # Add division to checklist
+    $investigated{$divname}=1;
+
+    # Handle no dependency
+    unless (exists $dependencies{$divname}) {
+	push @divisionorder,$divname;
+	$divisionordered{$divname} = 1;
+
+	# remove division from checklist
+	pop @investigated_stack;
+	delete $investigated{$divname};
+	return;
+    }
+
+    # Handle direct dependencies
+    my @directdeps = @{$dependencies{$divname}};
+    delete $dependencies{$divname};
+    foreach my $dep (@directdeps) {
+	if (exists $divisions{$dep}) {
+	    investigateDepOrder($dep);
+	} else {
+	    push @errors,"Illegal dependency '$dep' in division '$divname'";
+	}
+    }
+    
+    push @divisionorder,$divname;
+    $divisionordered{$divname} = 1;
+
+    # remove division from checklist
+    pop @investigated_stack;
+    delete $investigated{$divname};
+}
+
+my @divnames;
+
+sub orderDivisionExecution {
+    @divnames=keys %divisions;
+    while (@divnames) {
+	my $divname=pop @divnames;
+	investigateDepOrder($divname);
+    }
+
+}
+
+#
+# Extract information
+#
+
+use Data::Dumper;
+
+find(\&findDivisions, $base_dir);
+print "Divisions:\n".Dumper(\%divisions)."\n" if $arg_debug;
+exit 1 if errors();
+
+readDivisionPromiseFiles;
+print "Bundlesequences:\n".Dumper(\%bundlesequences)."\n" if $arg_debug;
+print "Dependencies:\n".Dumper(\%dependencies)."\n" if $arg_debug;
+exit 1 if errors();
+
+orderDivisionExecution;
+print "Divisionorder:\n".Dumper(\@divisionorder)."\n" if $arg_debug;
+exit 1 if errors();
+
+#
+# Print classes and variables
+#
+
+# Print basedir for the division: {prefix}_basedir
+print "=".$arg_prefix."_basedir=".$arg_basedir."\n";
+print "Variable ".$arg_prefix."_basedir=".$arg_basedir."\n" if $arg_verbose;
+
+# Print class for used division library: cfdivisionlibrary_{prefix}
+print "+cfdivisionlibrary_".$arg_prefix."\n";
+print "Class cfdivisionlibrary_".$arg_prefix."\n" if $arg_verbose;
+
+# Print division names as array: @{prefix}_divisions
+print "@".$arg_prefix."_divisions={".join(',',map { '"'.$_.'"' } keys %divisions)."}\n";
+print 'Variable @'.$arg_prefix."_divisions={".join(',',map { '"'.$_.'"' } keys %divisions)."}\n" if $arg_verbose;
+
+# Print inputs as array: @{prefix}_inputs
+my @input_paths = map { File::Spec->catfile(
+			    $arg_basedir,
+			    $divisions{$_},
+			    $divisionfiles{$_}) } @divisionorder;
+print '@'.$arg_prefix.'_inputs={'.join(',',map { '"'.$_.'"' } @input_paths)."}\n";
+print 'Variable @'.$arg_prefix.'_inputs={'.join(',',map { '"'.$_.'"' } @input_paths)."}\n" if $arg_verbose;
+
+# Print bundlesequence as array: @{prefix}_bundlesequence
+my @bundlesequence = map { @{$bundlesequences{$_}} } @divisionorder;
+print '@'.$arg_prefix.'_bundlesequence={'.join(',',map { '"'.$_.'"' } @bundlesequence)."}\n";
+print 'Variable @'.$arg_prefix.'_bundlesequence={'.join(',',map { '"'.$_.'"' } @bundlesequence)."}\n" if $arg_verbose;
+
+# Print defined divisions classes: {prefix}_{divisionname}
+map { print join('_',"+".$arg_prefix,$_)."\n" } @divisionorder;
+map { print join('_',"Class ".$arg_prefix,$_)."\n" } @divisionorder if $arg_verbose;
+
+# Print local paths to divisions as associative array: {prefix}_localpath[{divisionname}]
+map { 
+    print "=".$arg_prefix."_"."localpath[".$_."]=".$divisions{$_}."\n";
+} keys %divisions;
+map { 
+    print "Variable ".$arg_prefix."_"."localpath[".$_."]=".$divisions{$_}."\n";
+} keys %divisions if $arg_verbose;
+
+# Print full paths to divisions as associative array: {prefix}_path[{divisionname}]
+map { 
+    print "=".$arg_prefix."_"."path[".$_."]=".$divisionpaths{$_}."\n";
+} keys %divisionpaths;
+map { 
+    print "Variable ".$arg_prefix."_"."path[".$_."]=".$divisionpaths{$_}."\n";
+} keys %divisionpaths if $arg_verbose;
+
+=pod
+
+=head1 Motivation
+
+The standard way of reading promises files and executing interdependent bundles in CFEngine is quite simple. The cf-code developer has only one main bundlesequence, and as alternative he has to resolve into calling other bundles from the calling bundles own methode section. This could easily lead to complex monolithic executions structures that are hard to maintain and test (like using mockup promises). It is also harder to reuse CFEngine-code as distributeable packages/libraries for others to CFEngine implementations. B<cfdivision> is an attempt to distribute the role of the central bundlesequence out into B<divisions> (metaphor for packages, components or alike structures in other languages).
+
+=head1 Definitions
+
+B<cfdivisions> introduces some new concepts to the organization of CFEngine code and functionality.
+
+=head2 Division
+
+A B<division> is a special folder within the CFEngine folder structure. Division folders can contain other division folders recursively. A division folder is special in regard that it contains a special division promises file (normally C<division-promises.cf>).
+
+=head2 Division promises file
+
+A division promises file (normally called C<division-promises.cf>) contains CFEngines promises and special cfdivisions annotations for this division. The cfdivisions annotations declare
+
+=over 
+
+=item 
+
+the dependency on other divisions
+
+=item 
+
+the division's own bundle sequence
+
+=back
+
+=head2 Division names
+
+Division names are based on the I<canonized> version of the filesystem's folder paths of their definition. Since the paths of the filesystem can contain illegal characters for CFEngine variable and class names the canonization replaces any illegal characters with a '_'. 
+
+Example: 'webservers/www.mysite.com' becomes 'webservers_www_mysite_com'
+
+=head2 Division namespace
+
+Every execution of B<cfdivisions> builds the CFEngine datastructures within the scope of a B<division namespace>. A B<division namespace> is just textual prefix to CFEngine variable and class names. The default B<division namespace> is called 'I<division>'. 
+
+Use the option --prefix for defining another B<division namespace>. It is recommended to use different division namespaces / prefixes when B<cfdivisions> is run multiple times within a cf-agent execution to prevent name collisions between runs.
+
+=head2 Top most promises file
+
+The promises file that implements B<cfdivisions> like C<promises.cf> or C<failsafe.cf> or others user defined promises file. The top most promises file is the starting point of the cf-agent run.
+
+=head1 Annotations
+
+Annotations are written within commented sections of a B<division promises file>. A division promises file contains following annotations.
+
+=head2 *cfdivisions_depends
+
+This annotation defines if the division depends on another division within the division namespace
+
+Example: 
+  #
+  # *cfdivisions_depends=mylibrary,webservers_www_mysite1_com,webservers_www_mysite2_com
+  #
+
+=head2 *cfdivisions_bundlesequence
+
+This annotation defines the sequence of bundles that are run when this B<division> is executed.
+
+Example: 
+  #
+  # *cfdivisions_bundlesequence=mybundleA,mybundleB
+  #
+
+B<Note>:
+
+The bundles in the sequence can also originate from other B<divsions> or promises files which have to be preloaded either 
+
+=over 
+
+=item *
+
+by B<cfdivisions> by B<*cfdivisions_bundlesequence> or 
+
+=item *
+
+by C<inputs> in C<body common control> in the top most promise file. 
+
+=back
+
+=head1 Usage of cfdivisions by example
+
+The following walkthrough example shows how to implement a minimal B<cfdivisions> based setup.
+
+=head2 Installation of cfdivisions
+
+B<cfdivisions> needs to be placed in the folder C<$(sys.workdir)/modules> (like C</var/cfengine/modules> on most unix machines). The script B<cfdivision> needs to have execution permissions for cf-agent.
+
+=head2 Embedding of cfdivisions into the top most promises files (example)
+
+This example shows how B<cfdivisions> is embedded into a top most promises files (like C<promises.cf>) under following conditions:
+
+=over 
+
+=item 1.
+
+The CFEngine C<inputs>-folder contains a subfolder C<divlib> (see C<--basedir> option). The subfolder C<divlib> again contains all the division folders to be imported and executed.
+
+=item 2.
+
+No C<--prefix> option is used, so the division namespace is just called the default name: C<division>. 
+
+=back
+
+B<Example>: C<promises.cf>
+
+  bundle common import_divisions
+  {
+ 
+    classes:
+      !imported_division::
+        "imported_divisions" expression => usemodule ("cfdivisions","--basedir=divlib");
+
+    reports:
+      imported_division::
+         "cfdivisions.division_inputs: $(cfdivisions.division_inputs)";
+         "cfdivisions.division_bundlesequence: $(cfdivisions.division_bundlesequence)";
+  }
+
+  ...
+
+  body common control
+  {
+    inputs => {
+               "cfengine_stdlib.cf", 
+               @(cfdivisions.division_inputs),
+              };
+    bundlesequence => { 
+                       "import_divisions",
+                       @(cfdivisions.division_bundlesequence),
+                      }; 
+  }
+
+=head2 Multiple divisions (example)
+
+In this example we define 3 divisions
+
+=over 
+
+=item 1.
+
+B<mylib> : a library of bundles and bodies with no initial execution sequence. Placement after update from the CFEngines repository is C<$(sys.workdir)/inputs/divlib/mylib>.
+
+=item 2.
+
+B<webservers> : a collection of bundles and bodies with focus on generic webserver setup. This division depends directly on bundles or bodies from division B<mylib>. Placement after update from the CFEngines repository is C<$(sys.workdir)/inputs/divlib/webservers>.
+
+=item 3.
+
+B<webservers_www_mysite_com> : a collection of bundles and bodies with focus on certain website setup. This division depends I<directly> on bundles or bodies from division B<webservers> and I<indirectly> via B<webservers> on B<mylib>. Placement after update from the CFEngines repository is C<$(sys.workdir)/inputs/divlib/webservers/www.mysite.com>.
+
+=back
+
+=head2 Filesystem structure (example)
+
+The above division are the placed in following filesystem hierachy
+
+$(sys.workdir)/inputs
+  |
+  |->promises.cf
+  |
+  -->divlib B<{Library folder for divisions under the namespace "division"}>
+    |
+    |->mylib B<{Division "mylib"}>
+    |    |
+    |    |->division-promises.cf
+    |    |
+    |    ... {other files}
+    |
+    |
+    |->webservers B<{Division "webservers"}>
+    |    |
+    |    |->division-promises.cf
+    |    |
+    |    |->www.mysite.com B<{Division "webservers_www_mysite_com"}>
+    |    |    |
+    |    |    |->division-promises.cf
+    |    |    |
+    |    |    ... {other files for division "webservers_www_mysite_com"}
+    |    |
+    |    ... {other files for division "webservers"}
+    |
+    ... {other divisions}
+
+=head2 Division promises files (example)
+
+Each division has its own C<division-promises.cf>.
+
+=head3 $(sys.workdir)/inputs/divlib/mylib/division-promises.cf
+
+The promises for division B<mylib> can contain empty annotations like:
+
+  ...
+  #
+  # *cfdivisions_depends=
+  # *cfdivisions_bundlesequence=
+  #
+  ...
+  
+No bundles of this division are directly executed in the top bundlesequence after this module is loaded.
+
+=head3 $(sys.workdir)/inputs/divlib/webservers/division-promises.cf
+
+The promises for division B<webservers> would have following annotations:
+
+  ...
+  #
+  # *cfdivisions_depends=mylib
+  # *cfdivisions_bundlesequence=base_webserver,webserver_log_management
+  #
+  
+  bundle agent base_webserver
+  {
+    ...
+  }  
+  
+  bundle agent virtual_webserver(domain)
+  {
+    ...
+  }
+
+  bundle agent webserver_log_management
+  {
+    methods:
+    # calls some bundles from division 'mylib'
+    ...
+  }
+  
+This division requires the preloading of division B<mylib>, since a bundle from it's own bundlesequence invokes a mylib-based bundle.
+
+=head3 $(sys.workdir)/inputs/divlib/webservers/www.mysite.com/division-promises.cf
+
+The promises for division B<webservers_www_mysite_com> would have following annotations:
+
+  ...
+  #
+  # *cfdivisions_depends=webservers
+  # *cfdivisions_bundlesequence=vhost_www_mysite_com,vhost_www_mysite_com_upload_area
+  #
+  
+  bundle agent vhost_www_mysite_com
+  {
+    methods:
+    # call bundle 'virtual_webserver' from division 'webservers'
+    ...
+  }  
+  
+  bundle agent vhost_www_mysite_com_upload_area
+  {
+    methods:
+    # call a bundle from division 'mylib' 
+    ...
+  }
+  
+This division requires the preloading of division B<webservers> and B<mylib>. Since division B<webservers> already has a dependency to B<mylib>, the dependency does not need to be declared in C<*cfdivisions_depends=...>
+
+=head2 Execution
+
+When cf-agent runs the top most promises file following actions will occur:
+
+=over 
+
+=item 1.
+
+B<cfdivisions> is started. B<cfdivisions> reads and validated the divisions from inputs-subfolder 'divlib'.
+
+=item 2.
+
+B<cfdivisions> returns some CFEngine variables and classes.
+
+=over
+
+=item *
+
+C<@(cfdivisions.division_inputs)> contains the ordered load list of division promise files:
+
+=over
+
+=item 1.
+
+divlib/mylib/division-promises.cf
+
+=item 2.
+
+divlib/webservers/division-promises.cf
+
+=item 3.
+
+webservers/www.mysite.com/division-promises.cf
+
+=back
+
+=item *
+
+C<@(cfdivisions.division_bundlesequence)> contains the ordered list of division bundles to be executed:
+
+=over
+
+=item 1.
+
+base_webserver
+
+=item 2.
+
+webserver_log_management
+
+=item 3.
+
+vhost_www_mysite_com
+
+=item 4.
+
+vhost_www_mysite_com_upload_area
+
+=back
+
+=item *
+
+Classes for every identified and loaded division will be created:
+
+=over
+
+=item 1.
+
+C<division_mylib>
+
+=item 2.
+
+C<division_webservers>
+
+=item 3.
+
+C<division_webservers_www_mysite_com>
+
+=back
+
+=back
+
+=item 3.
+
+In section C<inputs> from C<body common control> cf-agent continues the loading of promise files defined in C<@(cfdivisions.division_inputs)>.
+
+=item 4.
+
+In section C<bundlesequence> from C<body common control> cf-agent executes then the bundles defined in C<@(cfdivisions.division_bundlesequence)>.
+
+=back
+
+=head1 Generated global variables and classes
+
+The execution of B<cfdivisions> creates various global classes and variables. The naming is depending on 
+
+=over
+
+=item 1.
+
+the B<cfdivisions> script name -> B<{script}>
+
+=item 2.
+
+the content of the C<--prefix> option (default C<division>) -> B<{prefix}>
+
+=item 3.
+
+the name of a parsed division -> B<{division}>
+
+=back
+
+=head2 Classes
+
+=over
+
+=item 1.
+
+cfdivisionlibrary_B<{prefix}> : A library with namespace B<{prefix}> has been parsed.
+
+Example: "cfdivisionlibrary_division" expression => "any";
+
+=item 2.
+
+B<{prefix}>_B<{division}> : A division B<{division}> within the library namespace B<{prefix}> has been parsed.
+
+Example: "division_webservers_www_mysite_com" expression => "any";
+
+=back
+
+=head2 Simple variables
+
+=over
+
+=item 1.
+
+B<{script}>.B<{prefix}>_basedir : The basedir for divisions in the namespace B<{prefix}>.
+
+Example: "division_basedir" string = "libdiv";
+
+=back
+
+=head2 List variables
+
+=over
+
+=item 1.
+
+B<{script}>.B<{prefix}>_divisions : A slist over all parsed canonized division names.
+
+Example: "division_divisions" slist => {"mylib", "webservers", "webservers_www_mysite_com"};
+
+=item 2.
+
+B<{script}>.B<{prefix}>_inputs : An ordered slist over all division promises files for C<inputs> in C<body common control>.
+
+Example: "division_inputs" slist => {"divlib/mylib/division-promises.cf", "divlib/webservers/division-promises.cf", "webservers/www.mysite.com/division-promises.cf"};
+
+=item 3.
+
+B<{script}>.B<{prefix}>_bundlesequence : An ordered slist over all division promises for C<bundlessequence> in C<body common control>.
+
+Example: "division_bundlesequence" slist => {"base_webserver", "webserver_log_management", "vhost_www_mysite_com", "vhost_www_mysite_com_upload_area"};
+
+=back
+
+=head2 Array variables
+
+=over
+
+=item 1.
+
+B<{script}>.B<{prefix}>_path[B<Division>] : The absolute path to the division folder
+
+Example: "division_path[webservers_www_mysite_com]" string = "/var/cfengine/inputs/divlib/webservers/www.mysite.com";
+
+=item 2.
+
+B<{script}>.B<{prefix}>_localpath[B<Division>] : The local path to the division folder within the division library folder (see C<--basepath>).
+
+Example: "division_localpath[webservers]" string = "/webservers/www.mysite.com";
+
+=back
+
+=head1 Tips and recommendations
+
+Using B<cfdivisions> can be a first step in structuring complex CFengine scripts. With cfdivisions some aspects from object orientation and componentbased programming could be implementet and enhance the code reuse and maintainabillity.
+
+=head2 Naming convention of bundles in divisions
+
+For better readabillity and easier maintenance of bundles defined in cfdivisions managed promise files, it is a good idea to prepend the bundle names with the canonized name of its containing division.
+
+Example: Bundle C<content> in organized under division C</webservers/www.mysite.com> (canonized name C<webservers_www_mysite_com>) could be named instead to C<webservers_www_mysite_com_content>.
+
+=head2 Resources in divisions (code and data)
+
+It can be an good idea to place resources (template text files, ...) into the same division folder with the promises that are using them. The divisions path (basepath and local path or full path) can be used identify the path to the resources.
+
+=head2 Failsafe  mechanism
+
+Divisions can contain failsafe promises that could be called from C<failsafe.cf>. By creating special C<division-failsafe.cf> files in the divisions and refering to the from central C<failsafe.cf> file.
+
+B<!!! A failback implementation / adjustment needs thorough testing before being put into production !!!>
+
+B<Example> Adjusted C<failsafe.cf>:
+
+  bundle common import_divisions
+  {
+ 
+    classes:
+      !imported_division::
+        "imported_divisions" expression => usemodule ("cfdivisions","--basedir=divlib --promises=division-failsafe.cf --prefix=failback");
+
+    reports:
+      imported_division::
+         "cfdivisions.failback_inputs: $(cfdivisions.failback_inputs)";
+         "cfdivisions.failback_bundlesequence: $(cfdivisions.failback_bundlesequence)";
+  }
+
+  ...
+
+  body common control
+  {
+    inputs => {
+               "cfengine_stdlib.cf", 
+               @(cfdivisions.failback_inputs),
+              };
+    bundlesequence => { 
+                       "import_divisions",
+                       @(cfdivisions.failback_bundlesequence),
+                      }; 
+  }
+
+=head1 Authors 
+
+L<Sascha Dibbern|http://sascha.dibbern.info/> (sascha@dibbern.info) 
+
+=cut
