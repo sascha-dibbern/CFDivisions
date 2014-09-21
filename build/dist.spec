@@ -11,7 +11,7 @@ Vendor: <% $zilla->license->holder %>
 Source: <% $archive %>
     
 BuildRoot: %{_tmppath}/%{name}-%{version}-BUILD
-BuildRequires:	
+BuildRequires: perl
 Requires: cfengine >=3.2
     
 %description
