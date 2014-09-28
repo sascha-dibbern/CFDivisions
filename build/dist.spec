@@ -21,6 +21,7 @@ Requires: cfengine >= 3.2
 %setup -q
 
 %build
+PERL_MB_OPT='--install_base "/"'
 perl Makefile.PL
 make test
     
