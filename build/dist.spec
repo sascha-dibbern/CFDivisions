@@ -41,8 +41,7 @@ if [ "%{buildroot}" != "/" ] ; then
 fi
 
 %post
-cfd_path=`which cfdivisions`
-cp $cfd_path /var/cfengine/modules/cfdivisions
+cp /usr/local/bin/cfdivisions /var/cfengine/modules/cfdivisions
 
 %preun
 rm /var/cfengine/modules/cfdivisions
