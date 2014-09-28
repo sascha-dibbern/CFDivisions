@@ -30,7 +30,7 @@ if [ "%{buildroot}" != "/" ] ; then
 fi
 echo "buildroot: %{buildroot}"
 # Reset install base
-PERL_MB_OPT=--install_base "/"
+PERL_MB_OPT='--install_base "/"'
 make install DESTDIR=%{buildroot}
 echo "filelist: %{_tmppath}/filelist"
 find %{buildroot} | sed -e 's#%{buildroot}##' > %{_tmppath}/filelist
