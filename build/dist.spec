@@ -21,8 +21,7 @@ Requires: cfengine >= 3.2
 %setup -q
 
 %build
-PERL_MB_OPT='--install_base "/"'
-PERL_MM_OPT='INSTALL_BASE=/'
+PERL_MM_OPT="INSTALLDIRS=site INSTALLSITEARCH='/usr/local/lib64/perl5' INSTALLSITEBIN='/usr/local/bin' INSTALLSITELIB='/usr/local/share/perl5' INSTALLSITEMAN1DIR=/usr/local/share/man/man1 INSTALLSITEMAN3DIR=/usr/local/share/man/man3 INSTALLSITESCRIPT='/usr/local/bin'"
 perl Makefile.PL
 make test
     
@@ -31,9 +30,6 @@ if [ "%{buildroot}" != "/" ] ; then
     rm -rf %{buildroot}
 fi
 echo "buildroot: %{buildroot}"
-# Reset install base
-PERL_MB_OPT='--install_base "/"'
-PERL_MM_OPT='INSTALL_BASE=/'
 env | sort
 make install DESTDIR=%{buildroot}
 echo "filelist: %{_tmppath}/filelist"
