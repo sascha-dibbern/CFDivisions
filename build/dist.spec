@@ -22,6 +22,7 @@ Requires: cfengine >= 3.2
 
 %build
 PERL_MB_OPT='--install_base "/"'
+PERL_MM_OPT='INSTALL_BASE=/'
 perl Makefile.PL
 make test
     
@@ -32,6 +33,7 @@ fi
 echo "buildroot: %{buildroot}"
 # Reset install base
 PERL_MB_OPT='--install_base "/"'
+PERL_MM_OPT='INSTALL_BASE=/'
 env | sort
 make install DESTDIR=%{buildroot}
 echo "filelist: %{_tmppath}/filelist"
