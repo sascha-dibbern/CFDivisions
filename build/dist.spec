@@ -28,7 +28,9 @@ make test
 if [ "%{buildroot}" != "/" ] ; then
     rm -rf %{buildroot}
 fi
+echo "buildroot: %{buildroot}"
 make install DESTDIR=%{buildroot}
+echo "filelist: %{_tmppath}/filelist"
 find %{buildroot} | sed -e 's#%{buildroot}##' > %{_tmppath}/filelist
 
 %clean
