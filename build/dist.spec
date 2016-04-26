@@ -21,7 +21,8 @@ Requires: cfengine >= 3.2
 %setup -q
 
 %build
-PERL_MM_OPT="INSTALLDIRS=site INSTALLSITEARCH='/usr/local/lib64/perl5' INSTALLSITEBIN='/usr/local/bin' INSTALLSITELIB='/usr/local/share/perl5' INSTALLSITEMAN1DIR=/usr/local/share/man/man1 INSTALLSITEMAN3DIR=/usr/local/share/man/man3 INSTALLSITESCRIPT='/usr/local/bin'"
+CFMODULES=${CFMODULES:'/var/cfengine/modules'}
+PERL_MM_OPT="INSTALLDIRS=site INSTALLSITEARCH=${INSTALLSITEARCH:'${CFMODULES}/lib64/perl5'} INSTALLSITEBIN=${INSTALLSITEBIN:'${CFMODULES}/bin'} INSTALLSITELIB=${INSTALLSITELIB:'${CFMODULES}/perl5'} INSTALLSITEMAN1DIR=${INSTALLSITEMAN1DIR:'/usr/local/share/man/man1'} INSTALLSITEMAN3DIR=${INSTALLSITEMAN3DIR:'/usr/local/share/man/man3'} INSTALLSITESCRIPT=${INSTALLSITESCRIPT:'${CFMODULES}'}"
 perl Makefile.PL
 make test
     
@@ -41,10 +42,8 @@ if [ "%{buildroot}" != "/" ] ; then
 fi
 
 %post
-cp /usr/local/bin/cfdivisions /var/cfengine/modules/cfdivisions
 
 %preun
-rm /var/cfengine/modules/cfdivisions
 
 %files -f %{_tmppath}/filelist
 %defattr(-,root,root)
