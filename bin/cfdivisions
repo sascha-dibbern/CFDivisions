@@ -53,10 +53,11 @@ use File::Spec;
 use Getopt::Long;
 
 my @errors;
-my $arg_basedir       = "";
-my $arg_prefix        = "division";
-my $arg_inputs        = "/var/cfengine/inputs";
-my $arg_promises      = "division-promises.cf";
+my $cfd_prefix          = "cfdivisions";
+my $arg_basedir         = "";
+my $arg_division_prefix = "division";
+my $arg_inputs          = "/var/cfengine/inputs";
+my $arg_promises        = "division-promises.cf";
 my $arg_verbose;
 my $arg_debug;
 
@@ -64,7 +65,7 @@ GetOptions (
     "basedir=s"  => \$arg_basedir,
     "inputs:s"   => \$arg_inputs,
     "promises:s" => \$arg_promises,
-    "prefix:s"   => \$arg_prefix,
+    "prefix:s"   => \$arg_division_prefix,
     "verbose"    => \$arg_verbose,
     "debug"      => \$arg_debug,
     );
@@ -73,13 +74,13 @@ sub errors {
     return 0 if scalar(@errors)==0;
 
     # Print if library has some kind of error
-    print "+".$arg_prefix."_error\n";
+    print "+".$arg_division_prefix."_error\n";
 
     # Print all error strings as text and as variable definitions
     my $num=0;
     foreach my $error (@errors) {
-	print "cfdivisions error $num in library '$arg_prefix': $error\n";
-	print "=".$arg_prefix."_error[".$num."]=\"".$error."\"\n";	
+	print "cfdivisions error $num in library '$arg_division_prefix': $error\n";
+	print "=".$arg_division_prefix."_error[".$num."]=\"".$error."\"\n";	
 	$num++;
     }
     return 1;
@@ -266,48 +267,48 @@ exit 1 if errors();
 #
 
 # Print basedir for the division: {prefix}_basedir
-print "=".$arg_prefix."_basedir=".$arg_basedir."\n";
-print "Variable ".$arg_prefix."_basedir=".$arg_basedir."\n" if $arg_verbose;
+print "=".$arg_division_prefix."_basedir=".$arg_basedir."\n";
+print "Variable ".$arg_division_prefix."_basedir=".$arg_basedir."\n" if $arg_verbose;
 
 # Print class for used division library: cfdivisionlibrary_{prefix}
-print "+cfdivisionlibrary_".$arg_prefix."\n";
-print "Class cfdivisionlibrary_".$arg_prefix."\n" if $arg_verbose;
+print "+cfdivisionlibrary_".$arg_division_prefix."\n";
+print "Class cfdivisionlibrary_".$arg_division_prefix."\n" if $arg_verbose;
 
 # Print division names as array: @{prefix}_divisions
-print "@".$arg_prefix."_divisions={".join(',',map { '"'.$_.'"' } keys %divisions)."}\n";
-print 'Variable @'.$arg_prefix."_divisions={".join(',',map { '"'.$_.'"' } keys %divisions)."}\n" if $arg_verbose;
+print "@".$arg_division_prefix."_divisions={".join(',',map { '"'.$_.'"' } keys %divisions)."}\n";
+print 'Variable @'.$arg_division_prefix."_divisions={".join(',',map { '"'.$_.'"' } keys %divisions)."}\n" if $arg_verbose;
 
-# Print inputs as array: @{prefix}_inputs
+# Print inputs as array: cfdivisions_@{prefix}_inputs
 my @input_paths = map { File::Spec->catfile(
 			    $arg_basedir,
 			    $divisions{$_},
 			    $divisionfiles{$_}) } @divisionorder;
-print '@'.$arg_prefix.'_inputs={'.join(',',map { '"'.$_.'"' } @input_paths)."}\n";
-print 'Variable @'.$arg_prefix.'_inputs={'.join(',',map { '"'.$_.'"' } @input_paths)."}\n" if $arg_verbose;
+print '@cfdivisions_'.$arg_division_prefix.'_inputs={'.join(',',map { '"'.$_.'"' } @input_paths)."}\n";
+print 'Variable @'.$arg_division_prefix.'_inputs={'.join(',',map { '"'.$_.'"' } @input_paths)."}\n" if $arg_verbose;
 
 # Print bundlesequence as array: @{prefix}_bundlesequence
 my @bundlesequence = map { @{$bundlesequences{$_}} } @divisionorder;
-print '@'.$arg_prefix.'_bundlesequence={'.join(',',map { '"'.$_.'"' } @bundlesequence)."}\n";
-print 'Variable @'.$arg_prefix.'_bundlesequence={'.join(',',map { '"'.$_.'"' } @bundlesequence)."}\n" if $arg_verbose;
+print '@cfdivisions_'.$arg_division_prefix.'_bundlesequence={'.join(',',map { '"'.$_.'"' } @bundlesequence)."}\n";
+print 'Variable @'.$arg_division_prefix.'_bundlesequence={'.join(',',map { '"'.$_.'"' } @bundlesequence)."}\n" if $arg_verbose;
 
 # Print defined divisions classes: {prefix}_{divisionname}
-map { print join('_',"+".$arg_prefix,$_)."\n" } @divisionorder;
-map { print join('_',"Class ".$arg_prefix,$_)."\n" } @divisionorder if $arg_verbose;
+map { print join('_',"+".$arg_division_prefix,$_)."\n" } @divisionorder;
+map { print join('_',"Class ".$arg_division_prefix,$_)."\n" } @divisionorder if $arg_verbose;
 
 # Print local paths to divisions as associative array: {prefix}_localpath[{divisionname}]
 map { 
-    print "=".$arg_prefix."_"."localpath[".$_."]=".$divisions{$_}."\n";
+    print "=".$arg_division_prefix."_"."localpath[".$_."]=".$divisions{$_}."\n";
 } keys %divisions;
 map { 
-    print "Variable ".$arg_prefix."_"."localpath[".$_."]=".$divisions{$_}."\n";
+    print "Variable ".$arg_division_prefix."_"."localpath[".$_."]=".$divisions{$_}."\n";
 } keys %divisions if $arg_verbose;
 
 # Print full paths to divisions as associative array: {prefix}_path[{divisionname}]
 map { 
-    print "=".$arg_prefix."_"."path[".$_."]=".$divisionpaths{$_}."\n";
+    print "=".$arg_division_prefix."_"."path[".$_."]=".$divisionpaths{$_}."\n";
 } keys %divisionpaths;
 map { 
-    print "Variable ".$arg_prefix."_"."path[".$_."]=".$divisionpaths{$_}."\n";
+    print "Variable ".$arg_division_prefix."_"."path[".$_."]=".$divisionpaths{$_}."\n";
 } keys %divisionpaths if $arg_verbose;
 
 =pod
@@ -380,13 +381,13 @@ Example:
 
 B<Note>:
 
-The bundles in the sequence can also originate from other B<divsions> or promises files which have to be preloaded either 
+The bundles in the sequence can also originate from other B<divisons> or promises files which have to be preloaded either 
 
 =over 
 
 =item *
 
-by B<cfdivisions> by B<*cfdivisions_bundlesequence> or 
+by B<cfdivisions> by B<*cfdivisions_{prefix}_bundlesequence> or 
 
 =item *
 
@@ -425,12 +426,12 @@ B<Example>: C<promises.cf>
  
     classes:
       !imported_division::
-        "imported_divisions" expression => usemodule ("cfdivisions","--basedir=divlib");
+        "imported_divisions" expression => usemodule ("cfdivisions","--basedir=divlib","--prefix=mydivisions");
 
     reports:
       imported_division::
-         "cfdivisions.division_inputs: $(cfdivisions.division_inputs)";
-         "cfdivisions.division_bundlesequence: $(cfdivisions.division_bundlesequence)";
+         "cfdivisions.cfdivisions_inputs: $(cfdivisions.cfdivisions_mydivisions_inputs)";
+         "cfdivisions.cfdivisions_bundlesequence: $(cfdivisions.cfdivisions_mydivisions_bundlesequence)";
   }
 
   ...
@@ -439,11 +440,11 @@ B<Example>: C<promises.cf>
   {
     inputs => {
                "cfengine_stdlib.cf", 
-               @(cfdivisions.division_inputs),
+               @(cfdivisions.cfdivisions_mydivisions_inputs),
               };
     bundlesequence => { 
                        "import_divisions",
-                       @(cfdivisions.division_bundlesequence),
+                       @(cfdivisions.cfdivisions_mydivisions_bundlesequence),
                       }; 
   }
 
@@ -471,32 +472,32 @@ B<webservers_www_mysite_com> : a collection of bundles and bodies with focus on 
 
 The above division are the placed in following filesystem hierachy
 
-$(sys.workdir)/inputs
-  |
-  |->promises.cf
-  |
-  -->divlib B<{Library folder for divisions under the namespace "division"}>
+  $(sys.workdir)/inputs
     |
-    |->mylib B<{Division "mylib"}>
-    |    |
-    |    |->division-promises.cf
-    |    |
-    |    ... {other files}
+    |->promises.cf
     |
-    |
-    |->webservers B<{Division "webservers"}>
-    |    |
-    |    |->division-promises.cf
-    |    |
-    |    |->www.mysite.com B<{Division "webservers_www_mysite_com"}>
-    |    |    |
-    |    |    |->division-promises.cf
-    |    |    |
-    |    |    ... {other files for division "webservers_www_mysite_com"}
-    |    |
-    |    ... {other files for division "webservers"}
-    |
-    ... {other divisions}
+    -->divlib B<{Library folder for divisions under the namespace "division"}>
+      |
+      |->mylib B<{Division "mylib"}>
+      |    |
+      |    |->division-promises.cf
+      |    |
+      |    ... {other files}
+      |
+      |
+      |->webservers B<{Division "webservers"}>
+      |    |
+      |    |->division-promises.cf
+      |    |
+      |    |->www.mysite.com B<{Division "webservers_www_mysite_com"}>
+      |    |    |
+      |    |    |->division-promises.cf
+      |    |    |
+      |    |    ... {other files for division "webservers_www_mysite_com"}
+      |    |
+      |    ... {other files for division "webservers"}
+      |
+      ... {other divisions}
 
 =head2 Division promises files (example)
 
@@ -588,7 +589,7 @@ B<cfdivisions> returns some CFEngine variables and classes.
 
 =item *
 
-C<@(cfdivisions.division_inputs)> contains the ordered load list of division promise files:
+C<@(cfdivisions.cfdivisions_{prefix}_inputs)> contains the ordered load list of division promise files:
 
 =over
 
@@ -608,7 +609,7 @@ webservers/www.mysite.com/division-promises.cf
 
 =item *
 
-C<@(cfdivisions.division_bundlesequence)> contains the ordered list of division bundles to be executed:
+C<@(cfdivisions.cfdivisions_{prefix}_bundlesequence)> contains the ordered list of division bundles to be executed:
 
 =over
 
@@ -654,11 +655,11 @@ C<division_webservers_www_mysite_com>
 
 =item 3.
 
-In section C<inputs> from C<body common control> cf-agent continues the loading of promise files defined in C<@(cfdivisions.division_inputs)>.
+In section C<inputs> from C<body common control> cf-agent continues the loading of promise files defined in C<@(cfdivisions.cfdivisions_{prefix}_inputs)>.
 
 =item 4.
 
-In section C<bundlesequence> from C<body common control> cf-agent executes then the bundles defined in C<@(cfdivisions.division_bundlesequence)>.
+In section C<bundlesequence> from C<body common control> cf-agent executes then the bundles defined in C<@(cfdivisions.cfdivisions_{prefix}_bundlesequence)>.
 
 =back
 
@@ -720,19 +721,19 @@ Example: "division_basedir" string = "libdiv";
 
 B<{script}>.B<{prefix}>_divisions : A slist over all parsed canonized division names.
 
-Example: "division_divisions" slist => {"mylib", "webservers", "webservers_www_mysite_com"};
+Example: "cfdivisions.mydivision_divisions" slist => {"mylib", "webservers", "webservers_www_mysite_com"};
 
 =item 2.
 
 B<{script}>.B<{prefix}>_inputs : An ordered slist over all division promises files for C<inputs> in C<body common control>.
 
-Example: "division_inputs" slist => {"divlib/mylib/division-promises.cf", "divlib/webservers/division-promises.cf", "webservers/www.mysite.com/division-promises.cf"};
+Example: "cfdivisions.mydivision_inputs" slist => {"divlib/mylib/division-promises.cf", "divlib/webservers/division-promises.cf", "webservers/www.mysite.com/division-promises.cf"};
 
 =item 3.
 
 B<{script}>.B<{prefix}>_bundlesequence : An ordered slist over all division promises for C<bundlessequence> in C<body common control>.
 
-Example: "division_bundlesequence" slist => {"base_webserver", "webserver_log_management", "vhost_www_mysite_com", "vhost_www_mysite_com_upload_area"};
+Example: "cfdivisions_bundlesequence" slist => {"base_webserver", "webserver_log_management", "vhost_www_mysite_com", "vhost_www_mysite_com_upload_area"};
 
 =back
 
