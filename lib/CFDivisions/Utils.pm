@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use v5.14;
 
+use Carp;
 use Data::Dumper;
 use Exporter 'import'; 
 
@@ -44,9 +45,9 @@ sub add_error {
 sub assert_cfengine_identifier {
     my $identifier = shift;
 
-    die "Illegal CFEngine identifier. Contains non-word characters." 
+    croak "Illegal CFEngine identifier. Contains non-word characters." 
 	if $identifier=~/\W/;
-    die "Illegal CFEngine identifier. Starting with '_'." 
+    croak "Illegal CFEngine identifier. Starting with '_'." 
 	if $identifier=~/^_/;
 
     return $identifier;
