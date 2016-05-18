@@ -34,6 +34,7 @@ sub new {
     };
 
     bless $self, $class;
+    return $self;
 }
 
 sub assert_no_circular_division_reference {

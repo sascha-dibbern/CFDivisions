@@ -43,6 +43,7 @@ sub new {
 	);
 
     bless $self, $class;
+    return $self;
 }
 
 sub library {
