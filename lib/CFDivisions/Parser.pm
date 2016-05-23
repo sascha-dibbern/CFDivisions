@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use v5.14;
 
+use Carp;
 use File::Find;
 use File::Spec;
 use Data::Dumper;
@@ -31,7 +32,7 @@ sub new {
 	inputs_dir                  => $inputs_dir,	
 	
 	verbose                     => $args{verbose},
-	library                     => $args{library} // carp("Failed to create 'library' attribute"),
+	library                     => $args{library} // croak("Failed to create 'library' attribute"),
 	library_subdir              => $args{library_subdir} // $args{library},	
     };
 
@@ -78,8 +79,8 @@ sub dependencies {
 
 sub is_valid_division_promise_file_path {
     my $self = shift;
-    my $path = shift // carp("No path defined");
-    my $file = shift // carp("No file defined");
+    my $path = shift // croak("No path defined");
+    my $file = shift // croak("No file defined");
 
     my $basedir  = $self->{basedir};
     my $rel_path = File::Spec->abs2rel( $path, $basedir ) ;
@@ -95,20 +96,20 @@ sub is_valid_division_promise_file_path {
 
 sub assert_no_division_name_collision {
     my $self     = shift;
-    my $divname  = shift // carp("No division name defined");
-    my $relpath  = shift // carp("No relative path defined");
+    my $divname  = shift // croak("No division name defined");
+    my $relpath  = shift // croak("No relative path defined");
     
     my $otherpath = $self->{divisions}->{$divname};
     if (defined $otherpath) {
-	carp("Name collision between for division '$divname' in paths '$relpath' and '$otherpath'");
+	croak("Name collision between for division '$divname' in paths '$relpath' and '$otherpath'");
     }
 }
 
 
 sub register_division_promise_file {
     my $self = shift;
-    my $path = shift // carp("No path defined");
-    my $file = shift // carp("No file defined");
+    my $path = shift // croak("No path defined");
+    my $file = shift // croak("No file defined");
 
     return 0 unless $self->is_valid_division_promise_file_path($path,$file);
 
@@ -143,14 +144,14 @@ sub find_division_promise_files {
 	say Dumper($self->{divisions});
     }
 
-    carp("Errors while finding division promise files:\n".join("\n",errors()))
+    croak("Errors while finding division promise files:\n".join("\n",errors()))
 	if $self->errors();
 }
 
 sub parse_cfdivisions_bundlesequence_token {
     my $self     = shift;
-    my $line     = shift // carp("No line defined");
-    my $division = shift // carp("No division name defined");
+    my $line     = shift // croak("No line defined");
+    my $division = shift // croak("No division name defined");
 
     return 0 unless ($line =~ /#\s*\*cfdivisions_bundlesequence/);
 
@@ -164,7 +165,7 @@ sub parse_cfdivisions_bundlesequence_token {
 	} split(/,/,$bsvalue);
     };
     if ($@) {
-	carp("Parsing '*cfdivisions_bundlesequence' failed. $@");
+	croak("Parsing '*cfdivisions_bundlesequence' failed. $@");
     }
     $self->{bundlesequences}->{$division} = \@bs;
     $self->{parsed_bundlesequence_token}  = 1;
@@ -174,8 +175,8 @@ sub parse_cfdivisions_bundlesequence_token {
 
 sub parse_cfdivisions_depends_token {
     my $self     = shift;
-    my $line     = shift // carp("No line defined");
-    my $division = shift // carp("No division name defined");
+    my $line     = shift // croak("No line defined");
+    my $division = shift // croak("No division name defined");
 
     return 0 unless ($line =~ /#\s*\*cfdivisions_depends/);
 
@@ -189,7 +190,7 @@ sub parse_cfdivisions_depends_token {
 	} split(/,/,$depvalue);
     };
     if ($@) {
-	carp("Parsing '*cfdivisions_depends' failed. $@");
+	croak("Parsing '*cfdivisions_depends' failed. $@");
     }
     
     $self->{dependencies}->{$division} = \@deps;
@@ -200,8 +201,8 @@ sub parse_cfdivisions_depends_token {
 
 sub parse_promisefile_line {
     my $self     = shift;
-    my $line     = shift // carp("No line defined");
-    my $division = shift // carp("No division name defined");
+    my $line     = shift // croak("No line defined");
+    my $division = shift // croak("No division name defined");
 
     chomp $line;
     return 0 unless $line =~ /#/; # only comment lines are parsed
@@ -212,7 +213,7 @@ sub parse_promisefile_line {
 
 sub read_division_promise_file {
     my $self     = shift;
-    my $division = shift // carp("No division name defined");
+    my $division = shift // croak("No division name defined");
     
     # Clean parse states
     $self->{parsed_bundlesequence_token} = undef;
@@ -221,7 +222,7 @@ sub read_division_promise_file {
     my $path    = $self->{divisionpaths}->{$division};
     my $line_nr = 1;
 
-    open(my $fh,"<",$path) || carp("Could not open division promise file: $path");
+    open(my $fh,"<",$path) || croak("Could not open division promise file: $path");
     while (<$fh>) {
 	# No need to go further if all things been parsed
 	last if $self->{parsed_bundlesequence_token} and $self->{parsed_depends_token};
@@ -230,7 +231,7 @@ sub read_division_promise_file {
 	    $self->parse_promisefile_line($_,$division);
 	};
 	if ($@) {
-	    carp("$@\nFile: '$path'\nLine: $line_nr");
+	    croak("$@\nFile: '$path'\nLine: $line_nr");
 	}
 	$line_nr++;
     }
@@ -247,7 +248,7 @@ sub read_division_promise_files {
 	add_error($@);
     }
 
-    carp("Errors while parsing:\n".join("\n",errors())) if errors();
+    croak("Errors while parsing:\n".join("\n",errors())) if errors();
 }
 
 
