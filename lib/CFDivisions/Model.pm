@@ -143,7 +143,12 @@ sub divisionorder {
 
 	my @divisions=keys %{$self->{divisions}};
 	for my $division (@divisions) {
-	    $self->add_divisiontree_to_divisionorder($division);
+	    eval {
+		$self->add_divisiontree_to_divisionorder($division);
+	    };
+	    if ($@) {
+		add_error($@);
+	    }
 	}
     }
 
