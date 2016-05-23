@@ -42,6 +42,8 @@ sub new {
 	    // scalar($model->divisionorder);
     }
 
+    $library         // croak('No library defined');
+    $basedir         // croak('No basedir defined');
     $bundlesequences // croak('No bundlesequences defined');
     $divisions       // croak('No divisions defined');
     $divisionpaths   // croak('No divisionpaths defined');
