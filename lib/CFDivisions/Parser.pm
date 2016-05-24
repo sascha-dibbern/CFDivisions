@@ -219,7 +219,10 @@ sub read_division_promise_file {
     $self->{parsed_bundlesequence_token} = undef;
     $self->{parsed_depends_token}        = undef;
 
-    my $path    = $self->{divisionpaths}->{$division};
+    my $path    = File::Spec->catfile(
+	$self->{divisionpaths}->{$division},
+	$DIVISION_PROMISE_FILE,
+	);
     my $line_nr = 1;
 
     open(my $fh,"<",$path) || croak("Could not open division promise file: $path");
