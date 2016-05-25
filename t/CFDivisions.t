@@ -2,10 +2,130 @@
 
 use strict;
 use warnings;
+use v5.14;
+
+use File::Spec;
 use Test::More;
+use Test::Exception;
+use Data::Dumper;
+use Cwd qw/abs_path/;
 
-BEGIN { use_ok( 'CFDivisions' ); }
+my $scriptpath;
+BEGIN {
+    ($scriptpath) = abs_path($0) =~ /(.*)CFDivisions.t/i;
+}
+use lib ($scriptpath);
 
+use CFDivisions;
+BEGIN { 
+    use_ok( 'CFDivisions' ); 
+    use_ok( 'ParserMock' ); 
+    use_ok( 'ModelMock' ); 
+    use_ok( 'OutputInterfaceMock' ); 
+}
+
+
+$CFDivisions::class_parser="ParserMock";
+$CFDivisions::class_model ="ModelMock";
+$CFDivisions::class_output="OutputInterfaceMock";
+
+subtest "Constructor" => sub {
+    dies_ok { 
+	my $cfd=CFDivisions->new(); 
+    } "Failed - no arguments";
+    lives_ok { 
+	my $cfd=CFDivisions->new(
+	    library => 'lib',
+	    ); 
+    } "Success - with arguments";
+};
+
+$CFDivisions::class_parser="CFDivisions::Parser";
+$CFDivisions::class_model ="CFDivisions::Model";
+$CFDivisions::class_output="CFDivisions::OutputInterface";
+
+subtest "Integrationtest: Loading testlib1" => sub {
+    my $testlib1 = 'testlib1';
+
+    my $cfd      = CFDivisions->new(
+	inputs_path => $scriptpath,
+	library     => $testlib1,
+	commments   => 0,
+#	verbose     => 1,
+	); 
+
+#    lives_ok { $cfd->run(); } "Running";
+    
+    is($cfd->parser->library,$testlib1,"Right library");
+    
+    lives_ok { $cfd->parse; } "Survived parsing";
+    my $bs = $cfd->parser->bundlesequences();
+    is_deeply(
+	$bs,
+	{
+	    'div1' => [
+		'div1_b1',
+		'div1_b2',
+		],
+	    'div3' => [
+		    'div3_b1'
+		],
+	    'path1_div2' => [
+		'path1_div2_b1',
+		'path1_div2_b2'
+	    ],
+	},
+	"Getting bundlesequences",
+	);
+    #say Dumper($bs);
+
+    lives_ok { $cfd->build_model; } "Survived building model";
+    my $divord = $cfd->model->divisionorder;
+    is_deeply(
+	$divord,
+	[
+	 'div1',
+	 'path1_div2',
+	 'div3',
+        ],
+	"Getting division order",
+	);
+    #say "Dumper($divord);
+
+    lives_ok { $cfd->generate_output; } "Survived output generation";
+
+    my @classes=$cfd->output_interface->classes_strings();
+    is_deeply(
+	\@classes,
+	[
+	 '+cfdivisionlibrary_testlib1',
+	 '+testlib1_div1',
+	 '+testlib1_path1_div2',
+	 '+testlib1_div3'
+        ],
+	'Valid class definitions',
+	);
+#    say Dumper(\@classes);
+    my @variables=$cfd->output_interface->variables_strings();
+    is_deeply(
+	\@variables,
+	[
+          '@cfdivisions_testlib1_inputs={"/home/sascha/projects/CFDivisions/t/testlib1/div1","/home/sascha/projects/CFDivisions/t/testlib1/path1/div2","/home/sascha/projects/CFDivisions/t/testlib1/div3"}',
+          '@cfdivisions_testlib1_bundlesequence={"div1_b1","div1_b2","path1_div2_b1","path1_div2_b2","div3_b1"}',
+          '=testlib1_basedir=/home/sascha/projects/CFDivisions/t/testlib1',
+          '@testlib1_divisions={"div1","div3","path1_div2"}',
+          '=testlib1_localpath[div1]=div1',
+          '=testlib1_localpath[div3]=div3',
+          '=testlib1_localpath[path1_div2]=path1/div2',
+          '=testlib1_path[div1]=/home/sascha/projects/CFDivisions/t/testlib1/div1',
+          '=testlib1_path[div3]=/home/sascha/projects/CFDivisions/t/testlib1/div3',
+          '=testlib1_path[path1_div2]=/home/sascha/projects/CFDivisions/t/testlib1/path1/div2'
+        ],
+	'Valid variable definitions'
+	);
+    #say Dumper(\@variables);
+
+};
 
 done_testing;
 

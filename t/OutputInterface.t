@@ -32,7 +32,7 @@ my %default_args=(
 subtest "Constructor" => sub {
     my $oi;
     lives_ok {
-	$oi=CFDivisions::Output->new(
+	$oi=CFDivisions::OutputInterface->new(
 	    %default_args,
 	    );
     } "Argumentative constructor";
@@ -40,7 +40,7 @@ subtest "Constructor" => sub {
 };
 
 subtest "Class strings" => sub {
-    my $oi=CFDivisions::Output->new(
+    my $oi=CFDivisions::OutputInterface->new(
 	%default_args,
 	);
 
@@ -57,7 +57,7 @@ subtest "Class strings" => sub {
 };
 
 subtest "Variable strings" => sub {
-    my $oi=CFDivisions::Output->new(
+    my $oi=CFDivisions::OutputInterface->new(
 	%default_args,
 	);
 
@@ -114,3 +114,5 @@ subtest "Variable strings" => sub {
 	"variables_strings"
 	);
 };
+
+done_testing;
