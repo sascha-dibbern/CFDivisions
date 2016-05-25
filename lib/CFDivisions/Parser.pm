@@ -53,6 +53,12 @@ sub library {
     return $value;
 }
 
+sub basedir {
+    my $self  = shift;
+    my $value = $self->{basedir};
+    return $value;
+}
+
 sub bundlesequences {
     my $self  = shift;
     my $value = $self->{bundlesequences};
@@ -233,9 +239,9 @@ sub read_division_promise_file {
 	eval {
 	    $self->parse_promisefile_line($_,$division);
 	};
-	if ($@) {
-	    croak("$@\nFile: '$path'\nLine: $line_nr");
-	}
+
+	croak("$@\nFile: '$path'\nLine: $line_nr") if ($@);
+
 	$line_nr++;
     }
     close $fh;
@@ -248,7 +254,8 @@ sub read_division_promise_files {
 	eval {
 	    $self->read_division_promise_file($division);
 	};
-	add_error($@);
+    
+	add_error($@) if ($@);
     }
 
     croak("Errors while parsing:\n".join("\n",errors())) if errors();
