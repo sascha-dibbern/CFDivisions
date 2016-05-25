@@ -28,16 +28,14 @@ sub canonize_divisionname {
 my @errors;
 
 sub errors {
-    my $self = shift;
-
-    return wantarray ? @errors : scalar(@errors);
+    return wantarray ? @errors : scalar @errors ;
 }
 
 sub add_error {
-    my $self  = shift;
-    my $error = shift;
+    my $error   = shift;
 
     if (defined $error) {
+	# croak "Here: .$error.";
 	push @errors,$error;
     }
 }
