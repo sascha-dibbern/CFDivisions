@@ -1,4 +1,4 @@
-package CFDivisions::Output;
+package CFDivisions::OutputInterface;
 
 use strict;
 use warnings;
@@ -15,6 +15,7 @@ sub new {
     my $parser    = $args{parser};
     my $model     = $args{model};
     my $verbose   = $args{verbose};
+    my $comments  = $args{comments};
 
     my $library         = $args{library};
     my $basedir         = $args{basedir};
@@ -60,6 +61,7 @@ sub new {
 
     my $self = {
 	verbose         => $verbose,
+	comments        => $comments,
 	library         => $library         // croak('No library defined'),
 	basedir         => $basedir         // croak('No basedir defined'),
 	bundlesequences => $bundlesequences // croak('No bundlesequences defined'),
@@ -88,16 +90,16 @@ sub division_classes {
 sub classes_strings {
     my $self = shift;
 
-    my $verbose = $self->{verbose};
-    my $library = $self->{library};
+    my $comments = $self->{comments};
+    my $library  = $self->{library};
     my @out;
 
     # Class for used division library: cfdivisionlibrary_{library}
-    push @out,"Class for library '$library':" if $verbose;
+    push @out,"Class for library '$library':" if $comments;
     push @out,$self->cfdivisionlibrary_class();
 
     # Defined division classes: {library}_{divisionname}
-    push @out,"Division classes for library '$library':" if $verbose;
+    push @out,"Division classes for library '$library':" if $comments;
     push @out,$self->division_classes();
     
     return @out;
@@ -174,32 +176,32 @@ sub variables_strings {
     my $self = shift;
 
     my $library    = $self->{library};
-    my $verbose    = $self->{verbose};
+    my $comments   = $self->{comments};
     
     my @out;
 
     # Input-files: cfdivisions_{library}_inputs
-    push @out,"Input-files for library '$library'" if $verbose;
+    push @out,"Input-files for library '$library'" if $comments;
     push @out,$self->input_files_variable();
 
     # Bundlesequence: @{library}_bundlesequence
-    push @out,"Bundlesequence for library '$library'" if $verbose;
+    push @out,"Bundlesequence for library '$library'" if $comments;
     push @out,$self->bundlesequence_variable();
 
     # Basedir for the division-library: {library}_basedir
-    push @out,"Bundlesequence for library '$library'" if $verbose;
+    push @out,"Bundlesequence for library '$library'" if $comments;
     push @out,$self->library_basedir();
     
     # Division names as array: @{library}_divisions
-    push @out,"Library divisions for '".$library."'_divisions" if $verbose;
+    push @out,"Library divisions for '".$library."'_divisions" if $comments;
     push @out,$self->library_divisions();
 
     # Local paths to divisions as associative array: {library}_localpath[{divisionname}]
-    push @out,"Local paths of library divisions for '$library'" if $verbose;    
+    push @out,"Local paths of library divisions for '$library'" if $comments;    
     @out=(@out,$self->library_division_localpaths());
 
     # Paths to divisions as associative array: {library}_path[{divisionname}]
-    push @out,"Paths of library divisions for '$library'" if $verbose;    
+    push @out,"Paths of library divisions for '$library'" if $comments;
     @out=(@out,$self->library_division_paths());
 
     return wantarray ? @out : \@out;
