@@ -1,0 +1,4 @@
+#
+# *cfdivisions_bundlesequence = path1_div2_b1,path1_div2_b2
+# *cfdivisions_depends = div1
+#
