@@ -152,9 +152,13 @@ sub divisionorder {
 	}
     }
 
+    croak "Errors while building divisionorder:\n".join("\n",errors()) 
+	if errors();
+ 
     return wantarray ?
 	@{$self->{divisionorder}} :
 	$self->{divisionorder};
 }
 
+#sub validate_
 1;
