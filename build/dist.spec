@@ -23,7 +23,7 @@ Requires: cfengine >= 3.2
 %build
 CFMODULES=${CFMODULES:-'/var/cfengine/modules'}
 PERL_MM_OPT="INSTALLDIRS=site INSTALLSITEARCH=${INSTALLSITEARCH:-'${CFMODULES}/lib64/perl5'} INSTALLSITEBIN=${INSTALLSITEBIN:-'${CFMODULES}/bin'} INSTALLSITELIB=${INSTALLSITELIB:-'${CFMODULES}/perl5'} INSTALLSITEMAN1DIR=${INSTALLSITEMAN1DIR:-'/usr/local/share/man/man1'} INSTALLSITEMAN3DIR=${INSTALLSITEMAN3DIR:-'/usr/local/share/man/man3'} INSTALLSITESCRIPT=${INSTALLSITESCRIPT:-'${CFMODULES}'}"
-env > /home/sascha/out.txt
+env | sort
 perl Makefile.PL
 make test
     
