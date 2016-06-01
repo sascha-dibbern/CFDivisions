@@ -68,6 +68,24 @@ Example: 'webservers/www.mysite.com' becomes 'webservers_www_mysite_com'
 Divisions can be nested within the sub-directories of other divisions.
 Care has to be taken that resources used in a divsion and the nested divisions are not in conflict.
 
+=head1 See also
+
+=over
+
+=item The conceptual overview
+
+L<'CFDivisions'|CFDivisions> 
+
+=item The CFEngine module
+
+L<'cfdivisions'|cfdivisions> 
+
+=item Content of a division promises file
+
+L<'division-promises.cf'|division-promises.cf>
+
+=back
+
 =cut
 
 1;

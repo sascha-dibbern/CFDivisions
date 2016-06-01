@@ -45,13 +45,23 @@ Directory name of the placement of divisions within the cfengines inputs-folder.
 
 Show more info when generating artefacts
 
+=back
+
 =head1 See also
 
 =over
 
-=item L<'CFDivisions'|CFDivisions> : the concepts behind the CFEngine module
+=item The conceptual overview
 
-=item L<'CFDivisions-examples'|CFDivisions-examples> : examples
+L<'CFDivisions'|CFDivisions> 
+
+=item Examples
+
+L<'CFDivisions-examples'|CFDivisions-examples> 
+
+=item Content of a division promises file
+
+L<'division-promises.cf'|division-promises.cf>
 
 =back
 

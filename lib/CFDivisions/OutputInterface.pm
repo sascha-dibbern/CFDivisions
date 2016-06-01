@@ -7,6 +7,92 @@ use v5.14;
 use Carp;
 use Data::Dumper;
 use CFDivisions::Utils;
+=pod
+
+=head1 Name
+
+CFDivisions::OutputInterface
+cfdivisions - A CFEngine3 module for using a component based promise management.
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+Class that create CFEngine classes and variables from CFDivision-metadata.
+
+=head1 CFENGINE CLASSES
+
+Classes for every identified and loaded division will be created:
+
+=over
+
+=item *
+
+cfdivisionlibrary_{library} : class for loaded library
+
+=item *
+
+{library}_{division} : class for a loaded division within a library
+
+=back
+
+=head1 CFENGINES VARIABLES
+
+=head2 Simple variables
+
+=over
+
+=item *
+
+cfdivisions.{library}_basedir
+
+The given libraries the base directory (directory under the inputs directory).
+
+=back
+
+=head2 Array variables
+
+=over
+
+=item *
+
+@(cfdivisions.{library}_divisions
+
+A list over all parsed canonized division names in library.
+
+=item *
+
+cfdivisions.cfdivisions_{library}_inputs)
+
+The ordered load list of division promise files to be loaded.
+
+=item *
+
+@(cfdivisions.cfdivisions_{library}_bundlesequence)
+
+The ordered list of division bundles to be executed.
+
+=back
+
+=head2 Associative array variables
+
+=over
+
+=item *
+
+cfdivisions.{library}_localpath[{division}]
+
+The local path of the division root directory within the library.
+
+=item *
+
+cfdivisions.{library}_path[{division}]
+
+The full path of the division root directory within the library.
+
+=back
+
+=cut
 
 sub new {
     my $class = shift;
@@ -180,21 +266,21 @@ sub variables_strings {
     
     my @out;
 
-    # Input-files: cfdivisions_{library}_inputs
-    push @out,"Input-files for library '$library'" if $comments;
-    push @out,$self->input_files_variable();
-
-    # Bundlesequence: @{library}_bundlesequence
-    push @out,"Bundlesequence for library '$library'" if $comments;
-    push @out,$self->bundlesequence_variable();
-
     # Basedir for the division-library: {library}_basedir
-    push @out,"Bundlesequence for library '$library'" if $comments;
+    push @out,"Basedir for library '$library'" if $comments;
     push @out,$self->library_basedir();
     
     # Division names as array: @{library}_divisions
     push @out,"Library divisions for '".$library."'_divisions" if $comments;
     push @out,$self->library_divisions();
+
+    # Input-files: @cfdivisions_{library}_inputs
+    push @out,"Input-files for library '$library'" if $comments;
+    push @out,$self->input_files_variable();
+
+    # Bundlesequence: @cfdivisions_{library}_bundlesequence
+    push @out,"Bundlesequence for library '$library'" if $comments;
+    push @out,$self->bundlesequence_variable();
 
     # Local paths to divisions as associative array: {library}_localpath[{divisionname}]
     push @out,"Local paths of library divisions for '$library'" if $comments;    
