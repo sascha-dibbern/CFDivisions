@@ -99,17 +99,18 @@ subtest "Variable strings" => sub {
 	"library_division_paths"
 	);
 
+    #say Dumper(scalar $oi->variables_strings());
     is_deeply(
 	scalar $oi->variables_strings(),
 	[
-	 '@cfdivisions_lib_inputs={"/root/lib/path_a","/root/lib/path_b"}',
-	 '@cfdivisions_lib_bundlesequence={"bund_a","bund_b"}',
-	 '=lib_basedir=/basedir',
-	 '@lib_divisions={"a","b"}',
-	 '=lib_localpath[a]=lib/path_a',
-	 '=lib_localpath[b]=lib/path_b',
-	 '=lib_path[a]=/root/lib/path_a',
-	 '=lib_path[b]=/root/lib/path_b',
+          '=lib_basedir=/basedir',
+          '@lib_divisions={"a","b"}',
+          '@cfdivisions_lib_inputs={"/root/lib/path_a","/root/lib/path_b"}',
+          '@cfdivisions_lib_bundlesequence={"bund_a","bund_b"}',
+          '=lib_localpath[a]=lib/path_a',
+          '=lib_localpath[b]=lib/path_b',
+          '=lib_path[a]=/root/lib/path_a',
+          '=lib_path[b]=/root/lib/path_b'
 	],
 	"variables_strings"
 	);

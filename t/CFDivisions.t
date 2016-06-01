@@ -25,26 +25,33 @@ BEGIN {
 }
 
 
-$CFDivisions::class_parser="ParserMock";
-$CFDivisions::class_model ="ModelMock";
-$CFDivisions::class_output="OutputInterfaceMock";
-
 subtest "Constructor" => sub {
-    dies_ok { 
-	my $cfd=CFDivisions->new(); 
-    } "Failed - no arguments";
+    $CFDivisions::class_parser="ParserMock";
+    $CFDivisions::class_model ="ModelMock";
+    $CFDivisions::class_output="OutputInterfaceMock";
+    
+    lives_ok { 
+	my $cfd=CFDivisions->new();
+    } "Success - no arguments";
+
     lives_ok { 
 	my $cfd=CFDivisions->new(
 	    library => 'lib',
 	    ); 
     } "Success - with arguments";
+
+
+    $CFDivisions::class_parser="CFDivisions::Parser";
+    my $cfd=CFDivisions->new();
+    is($cfd->parser->library,"division","Default library: division");
 };
 
-$CFDivisions::class_parser="CFDivisions::Parser";
-$CFDivisions::class_model ="CFDivisions::Model";
-$CFDivisions::class_output="CFDivisions::OutputInterface";
 
 subtest "Integrationtest: Loading testlib1" => sub {
+    $CFDivisions::class_parser="CFDivisions::Parser";
+    $CFDivisions::class_model ="CFDivisions::Model";
+    $CFDivisions::class_output="CFDivisions::OutputInterface";
+
     my $testlib1 = 'testlib1';
 
     my $cfd      = CFDivisions->new(
@@ -110,10 +117,10 @@ subtest "Integrationtest: Loading testlib1" => sub {
     is_deeply(
 	\@variables,
 	[
-          '@cfdivisions_testlib1_inputs={"/home/sascha/projects/CFDivisions/t/testlib1/div1","/home/sascha/projects/CFDivisions/t/testlib1/path1/div2","/home/sascha/projects/CFDivisions/t/testlib1/div3"}',
-          '@cfdivisions_testlib1_bundlesequence={"div1_b1","div1_b2","path1_div2_b1","path1_div2_b2","div3_b1"}',
           '=testlib1_basedir=/home/sascha/projects/CFDivisions/t/testlib1',
           '@testlib1_divisions={"div1","div3","path1_div2"}',
+          '@cfdivisions_testlib1_inputs={"/home/sascha/projects/CFDivisions/t/testlib1/div1","/home/sascha/projects/CFDivisions/t/testlib1/path1/div2","/home/sascha/projects/CFDivisions/t/testlib1/div3"}',
+          '@cfdivisions_testlib1_bundlesequence={"div1_b1","div1_b2","path1_div2_b1","path1_div2_b2","div3_b1"}',
           '=testlib1_localpath[div1]=div1',
           '=testlib1_localpath[div3]=div3',
           '=testlib1_localpath[path1_div2]=path1/div2',
@@ -123,7 +130,7 @@ subtest "Integrationtest: Loading testlib1" => sub {
         ],
 	'Valid variable definitions'
 	);
-    #say Dumper(\@variables);
+#    say Dumper(\@variables);
 
 };
 
