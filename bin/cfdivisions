@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use v5.14;
 
+use lib ('/var/cfengine/modules/perl5');
+
 use CFDivisions;
 
 my $cfd=CFDivisions->new();
