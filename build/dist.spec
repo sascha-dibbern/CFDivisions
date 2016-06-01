@@ -28,14 +28,19 @@ perl Makefile.PL
 make test
     
 %install
+if [ "$RPMBUILDLOG" = "" ]; then
+    RPMBUILDLOG=/dev/null
+fi
 if [ "%{buildroot}" != "/" ] ; then
     rm -rf %{buildroot}
 fi
-echo "buildroot: %{buildroot}"
-env | sort
-make install DESTDIR=%{buildroot}
-echo "filelist: %{_tmppath}/filelist"
-find %{buildroot} | sed -e 's#%{buildroot}##' > %{_tmppath}/filelist
+echo "buildroot: %{buildroot}" >>$RPMBUILDLOG
+env | sort >>$RPMBUILDLOG
+make install DESTDIR=%{buildroot} >>$RPMBUILDLOG
+echo "filelist: %{_tmppath}/filelist" >>$RPMBUILDLOG
+#find %{buildroot} | sed -e 's#%{buildroot}##' | perl -lne 'print if ! (($_ eq "/usr/lib64") or ($_ eq "/var/cfengine/modules"))' > %{_tmppath}/filelist
+find %{buildroot} | sed -e 's#%{buildroot}##' | perl -lne 'print if ! (-d $_)' > %{_tmppath}/filelist
+cat %{_tmppath}/filelist >>$RPMBUILDLOG
 
 %clean
 if [ "%{buildroot}" != "/" ] ; then
