@@ -15,8 +15,17 @@ our $DIVISION_PROMISE_FILE = "division-promises.cf";
 sub new {
     my $class = shift;
     my %args  = @_;
-    
-    my $inputs_path = $args{inputs_path} // "/var/cfengine/inputs";	
+
+    my $user  = getlogin || getpwuid($<);
+
+    # Default CFEngine input-folder behaviour
+    my $default_inputs_path = "/var/cfengine/inputs";
+    unless ($user eq 'root') {
+	$default_inputs_path = $ENV{HOME}."/.cfagent/inputs";	
+    }
+
+    # Override CFEngine input-folder behaviour ?
+    my $inputs_path = $args{inputs_path} // $default_inputs_path;	
     my ($inputs_vol,$inputs_dir) = File::Spec->splitpath( $inputs_path, 1 );
 
     my $self  = {
@@ -111,6 +120,14 @@ sub assert_no_division_name_collision {
     }
 }
 
+sub assert_no_empty_division_name {
+    my $self     = shift;
+    my $divname  = shift // croak("No division name defined");
+    my $relpath  = shift // croak("No relative path defined");
+    
+    croak("Illegal no-name division in path '$relpath'") if $divname eq "";
+}
+
 
 sub register_division_promise_file {
     my $self = shift;
@@ -122,8 +139,10 @@ sub register_division_promise_file {
     my $basedir  = $self->{basedir};
     my $rel_path = File::Spec->abs2rel( $path, $basedir );
     my $divname  = canonize_divisionname($rel_path);    
-    $self->assert_no_division_name_collision($divname,$rel_path);
 
+    $self->assert_no_empty_division_name($divname,$path);
+    $self->assert_no_division_name_collision($divname,$rel_path);
+    
     $self->{divisions}->{$divname}     = $rel_path;
     $self->{divisionpaths}->{$divname} = $path;
 
