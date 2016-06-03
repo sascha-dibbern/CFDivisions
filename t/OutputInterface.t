@@ -62,7 +62,7 @@ subtest "Variable strings" => sub {
 	);
 
     is($oi->input_files_variable(),
-       '@cfdivisions_lib_inputs={"/root/lib/path_a","/root/lib/path_b"}',
+       '@cfdivisions_lib_inputs={"/root/lib/path_a/division-promises.cf","/root/lib/path_b/division-promises.cf"}',
        "input_files_variable");
 
     is($oi->bundlesequence_variable(),
@@ -105,7 +105,7 @@ subtest "Variable strings" => sub {
 	[
           '=lib_basedir=/basedir',
           '@lib_divisions={"a","b"}',
-          '@cfdivisions_lib_inputs={"/root/lib/path_a","/root/lib/path_b"}',
+          '@cfdivisions_lib_inputs={"/root/lib/path_a/division-promises.cf","/root/lib/path_b/division-promises.cf"}',
           '@cfdivisions_lib_bundlesequence={"bund_a","bund_b"}',
           '=lib_localpath[a]=lib/path_a',
           '=lib_localpath[b]=lib/path_b',

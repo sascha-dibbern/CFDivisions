@@ -119,7 +119,10 @@ subtest "Integrationtest: Loading testlib1" => sub {
 	[
           '=testlib1_basedir='.$scriptpath.'testlib1',
           '@testlib1_divisions={"div1","div3","path1_div2"}',
-          '@cfdivisions_testlib1_inputs={"'.$scriptpath.'testlib1/div1","'.$scriptpath.'testlib1/path1/div2","'.$scriptpath.'testlib1/div3"}',
+          '@cfdivisions_testlib1_inputs={"'.
+	 $scriptpath.'testlib1/div1/division-promises.cf","'.
+	 $scriptpath.'testlib1/path1/div2/division-promises.cf","'.
+	 $scriptpath.'testlib1/div3/division-promises.cf"}',
           '@cfdivisions_testlib1_bundlesequence={"div1_b1","div1_b2","path1_div2_b1","path1_div2_b2","div3_b1"}',
           '=testlib1_localpath[div1]=div1',
           '=testlib1_localpath[div3]=div3',

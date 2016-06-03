@@ -7,6 +7,8 @@ use v5.14;
 use Carp;
 use Data::Dumper;
 use CFDivisions::Utils;
+use CFDivisions::Parser;
+
 =pod
 
 =head1 Name
@@ -196,8 +198,9 @@ sub input_files_variable {
     my $self = shift;
 
     my $library = $self->{library};
-    my @input_paths = map { 
-	$self->{divisionpaths}->{$_}
+    my @input_paths = map {
+	my @path=File::Spec->splitpath($self->{divisionpaths}->{$_},1);
+	File::Spec->catfile(@path,$CFDivisions::Parser::DIVISION_PROMISE_FILE);
     } @{$self->{divisionorder}};
     
     return '@cfdivisions_'.$library.'_inputs={'.join(',',map { '"'.$_.'"' } @input_paths)."}"
