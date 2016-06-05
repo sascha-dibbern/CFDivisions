@@ -1,5 +1,7 @@
 package CFDivisions::OutputInterface;
 
+# ABSTRACT: The output-interface of the CFEngine module 'cfdivisions'
+
 use strict;
 use warnings;
 use v5.14;

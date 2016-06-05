@@ -1,5 +1,8 @@
 # POD placeholder for 'division-promises.cf'
 
+# PODNAME: division-promises.cf
+# ABSTRACT: Content of division-promises.cf files
+
 =head1 NAME 
 
 division-promises.cf

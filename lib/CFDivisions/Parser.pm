@@ -1,5 +1,7 @@
 package CFDivisions::Parser;
 
+# ABSTRACT: Parser for division-promises.cf files
+
 use strict;
 use warnings;
 use v5.14;

@@ -1,5 +1,8 @@
 # POD placeholder for 'CFDivisions-example'
 
+# PODNAME: CFDivisions-example
+# ABSTRACT: Example about integration of divisions in CFengine
+
 =head1 NAME
 
 CFDivisions-example

@@ -1,5 +1,7 @@
 package CFDivisions::Utils;
 
+# ABSTRACT: Helper classes for CFDivisions
+
 use strict;
 use warnings;
 use v5.14;

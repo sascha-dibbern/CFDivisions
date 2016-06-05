@@ -1,5 +1,7 @@
 package CFDivisions::Model;
 
+# ABSTRACT: Building a logical model of of divisions in a division-library
+
 use strict;
 use warnings;
 use v5.14;

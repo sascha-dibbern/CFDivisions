@@ -1,5 +1,7 @@
 # POD placeholder for 'CFDivisions-development-example'
 
+# PODNAME: CFDivisions-development-example
+# ABSTRACT: Example how to create a divisions development setup with in CFengine
 1;
 
 =head1 NAME
