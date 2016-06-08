@@ -12,7 +12,7 @@ Source: <% $archive %>
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-BUILD
 BuildRequires: perl
-Requires: cfengine-community >= 3.2
+Requires: perl
 
 %description
 <% $zilla->abstract %>
