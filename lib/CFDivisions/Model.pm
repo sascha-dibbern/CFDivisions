@@ -22,7 +22,10 @@ sub new {
     croak "'dependencies' argument must be hashref" 
 	unless ref($deps) eq 'HASH';
 
+    my $divfilter = $args{divisionfilter} // [];
+
     my $self  = {
+	divisionfilter           => $divfilter,
 	divisions                => $divs,
 	dependencies             => $deps,
 
@@ -36,6 +39,12 @@ sub new {
     };
 
     bless $self, $class;
+
+    # Assert valid divisions in filter
+    for my $div (@$divfilter) {
+	$self->assert_existing_division($div);
+    }
+
     return $self;
 }
 
@@ -143,7 +152,13 @@ sub divisionorder {
     unless (defined $self->{divisionorder}) {
 	$self->{divisionorder} = [];
 
-	my @divisions=keys %{$self->{divisions}};
+	# What divisions will be used on the top level
+	my @divisions = @{$self->{divisionfilter}};	
+	if (scalar(@divisions)==0) {
+	    # No filter defined then use all divisions
+	    @divisions = keys %{$self->{divisions}};
+	}
+
 	for my $division (@divisions) {
 	    eval {
 		$self->add_divisiontree_to_divisionorder($division);

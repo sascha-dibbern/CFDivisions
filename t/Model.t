@@ -110,5 +110,32 @@ subtest "Divisionorder building" => sub {
 
 };
 
+subtest "Divisionorder building based on divisionfilter" => sub {
+    my $model = CFDivisions::Model->new(
+	divisionfilter => ['c'],
+	divisions      => {a=>'1',b=>'2',c=>'3',d=>'4',e=>'5',f=>'6'},
+	dependencies   => {
+	    b=>['a'],
+	    c=>['b'],
+	    d=>['b','c'],
+	    e=>['a'],
+	    f=>['b'],
+	}, # expected order -> a,b,c
+	);
+    
+    my @order = $model->divisionorder();
+    is_deeply(
+	\@order,
+	[
+	 'a',
+	 'b',
+	 'c',
+	],
+	"Right division order and filtering"
+	);
+    #say Dumper($model);
+
+};
+
 done_testing;
 

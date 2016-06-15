@@ -34,15 +34,19 @@ This ensures the generation of a consistent promisefile load sequence (under "bo
 
 =over
 
-=item --inputs_path 
+=item --divisionfilter=<division1>,<division2>,...
+
+Names of name of division to proces. Other divisions that the filtered division are dependend on are also processed.
+
+=item --inputs_path=<path>
 
 Alternative path to the CFEngines inputs-folder
 
-=item --library
+=item --library=<name>
 
 Name of the library. If no library is defined the default is 'division'.
 
-=item --library_subdir
+=item --library_subdir=<subdirectory name>
 
 Directory name of the placement of divisions within the cfengines inputs-folder.
 

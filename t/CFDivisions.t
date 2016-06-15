@@ -36,14 +36,18 @@ subtest "Constructor" => sub {
 
     lives_ok { 
 	my $cfd=CFDivisions->new(
-	    library => 'lib',
+	    library => 'lib',	    
 	    ); 
     } "Success - with arguments";
 
 
     $CFDivisions::class_parser="CFDivisions::Parser";
-    my $cfd=CFDivisions->new();
+    my $cfd=CFDivisions->new(divisionfilter=>'a ,  b');
+
     is($cfd->parser->library,"division","Default library: division");
+
+    my $df = $cfd->divisionfilter();
+    is_deeply($df,['a','b'],"Divisionfilter parsed")
 };
 
 

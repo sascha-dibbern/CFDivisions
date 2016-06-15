@@ -127,13 +127,19 @@ sub new {
 
     GetOptions (
 	"verbose"           => \$args{verbose},
+	"divisionfilter:s"  => \$args{divisionfilter},
 	"inputs_path:s"     => \$args{inputs_path},
 	"library:s"         => \$args{library},
 	"library_subdir:s"  => \$args{library_subdir},
 	);
+    
+    # Default for divisionfilter is empty
+    $args{divisionfilter} = $args{divisionfilter} // "";
+    my $divisionfilter = [ split /\s*,\s*/,$args{divisionfilter} ];
 
     my $self  = {
 	verbose          => $args{verbose},
+	divisionfilter   => $divisionfilter,
 	library          => $args{library},
 	library_subdir   => $args{library_subdir},
 	inputs_path      => $args{inputs_path},
@@ -141,6 +147,11 @@ sub new {
     };
 
     bless $self, $class;
+}
+
+sub divisionfilter {
+    my $self = shift;
+    return wantarray ? @{$self->{divisionfilter}} : $self->{divisionfilter};
 }
 
 sub parser {
@@ -189,9 +200,10 @@ sub model {
     return $model if defined $model;
 
     $model = $class_model->new(
-	verbose       => $verbose,
-	divisions     => scalar $self->parser->divisions(),
-	dependencies  => scalar $self->parser->dependencies(),
+	verbose        => $verbose,
+	divisionfilter => $self->{divisionfilter},
+	divisions      => scalar $self->parser->divisions(),
+	dependencies   => scalar $self->parser->dependencies(),
 	);
 
     $self->{model} = $model;
