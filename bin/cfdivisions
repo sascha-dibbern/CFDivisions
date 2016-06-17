@@ -50,6 +50,10 @@ Name of the library. If no library is defined the default is 'division'.
 
 Directory name of the placement of divisions within the cfengines inputs-folder.
 
+=item --namespace=<namespace>
+
+The namespace for the whole libraries artifacts.
+
 =item --verbose
 
 Show more info when generating artefacts

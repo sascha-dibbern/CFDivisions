@@ -106,6 +106,7 @@ sub new {
     my $model     = $args{model};
     my $verbose   = $args{verbose};
     my $comments  = $args{comments};
+    my $namespace = $args{namespace};
 
     my $library         = $args{library};
     my $basedir         = $args{basedir};
@@ -215,7 +216,10 @@ sub bundlesequence_variable {
     my @bundlesequences   = map { 
 	@{$self->{bundlesequences}->{$_}} 
     } @{$self->{divisionorder}};
-    my $bs_string = join(',',(map { '"'.$_.'"' } @bundlesequences));
+
+    my $namespace = $self->{namespace} // 'default';
+
+    my $bs_string = join(',',( map { '"'.$namespace.':'.$_.'"' } @bundlesequences ));
     my $library   = $self->{library};
     
     return '@cfdivisions_'.$library.'_bundlesequence={'.$bs_string.'}';

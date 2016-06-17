@@ -131,6 +131,7 @@ sub new {
 	"inputs_path:s"     => \$args{inputs_path},
 	"library:s"         => \$args{library},
 	"library_subdir:s"  => \$args{library_subdir},
+	"namespace"         => \$args{namespace},
 	);
     
     # Default for divisionfilter is empty
@@ -143,6 +144,7 @@ sub new {
 	library          => $args{library},
 	library_subdir   => $args{library_subdir},
 	inputs_path      => $args{inputs_path},
+	namespace        => $args{namespace},
 	output           => [],
     };
 
@@ -234,9 +236,10 @@ sub output_interface {
     return $oi if defined $oi;
 
     $oi=$class_output->new(
-	verbose => $verbose,
-	parser  => $self->parser,
-	model   => $self->model,
+	verbose   => $verbose,
+	parser    => $self->parser,
+	model     => $self->model,
+	namespace => $self->{namespace},
 	);
 
     $self->{oi} = $oi;
