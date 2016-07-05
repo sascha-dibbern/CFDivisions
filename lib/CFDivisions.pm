@@ -131,7 +131,7 @@ sub new {
 	"inputs_path:s"     => \$args{inputs_path},
 	"library:s"         => \$args{library},
 	"library_subdir:s"  => \$args{library_subdir},
-	"namespace"         => \$args{namespace},
+	"namespace:s"       => \$args{namespace},
 	);
     
     # Default for divisionfilter is empty

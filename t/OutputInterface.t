@@ -56,7 +56,7 @@ subtest "Class strings" => sub {
 	);
 };
 
-subtest "Variable strings" => sub {
+subtest "Variable strings (default namespace)" => sub {
     my $oi=CFDivisions::OutputInterface->new(
 	%default_args,
 	);
@@ -114,6 +114,17 @@ subtest "Variable strings" => sub {
 	],
 	"variables_strings"
 	);
+};
+
+subtest "Variable strings (new namespace)" => sub {
+    my $oi=CFDivisions::OutputInterface->new(
+	%default_args,
+	namespace => 'other',
+	);
+
+    is($oi->bundlesequence_variable(),
+       q/@cfdivisions_lib_bundlesequence={"other:bund_a","other:bund_b"}/,
+       "bundlesequence_variable");
 };
 
 done_testing;

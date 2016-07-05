@@ -153,13 +153,13 @@ sub new {
     my $self = {
 	verbose         => $verbose,
 	comments        => $comments,
+	namespace       => $namespace       // 'default',
 	library         => $library         // croak('No library defined'),
 	basedir         => $basedir         // croak('No basedir defined'),
 	bundlesequences => $bundlesequences // croak('No bundlesequences defined'),
 	divisions       => $divisions       // croak('No divisions defined'),
 	divisionpaths   => $divisionpaths   // croak('No divisionpaths defined'),
 	divisionorder   => $divisionorder   // croak('No divisionorder defined'),
-	
     };
 
     bless $self, $class;
@@ -217,7 +217,7 @@ sub bundlesequence_variable {
 	@{$self->{bundlesequences}->{$_}} 
     } @{$self->{divisionorder}};
 
-    my $namespace = $self->{namespace} // 'default';
+    my $namespace = $self->{namespace};
 
     my $bs_string = join(',',( map { '"'.$namespace.':'.$_.'"' } @bundlesequences ));
     my $library   = $self->{library};
