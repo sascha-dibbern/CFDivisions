@@ -258,10 +258,11 @@ sub output_interface {
     return $oi if defined $oi;
 
     $oi=$class_output->new(
-	verbose   => $verbose,
-	parser    => $self->parser,
-	model     => $self->model,
-	namespace => $self->{namespace},
+	verbose        => $verbose,
+	parser         => $self->parser,
+	model          => $self->model,
+	namespace      => $self->{namespace},
+        ignore_bundles => $self->{ignore_bundles},
 	);
 
     $self->{oi} = $oi;
