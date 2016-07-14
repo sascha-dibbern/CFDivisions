@@ -36,7 +36,11 @@ This ensures the generation of a consistent promisefile load sequence (under "bo
 
 =item --divisionfilter=<division1>,<division2>,...
 
-Names of name of division to proces. Other divisions that the filtered division are dependend on are also processed.
+Names of divisions to proces only. Other divisions that the filtered division are dependend on are also processed.
+
+=item --ignore_bundles=<bundle1>,<bundle2>,...
+
+Names of bundles that are ignored in the generated bundlesequence.
 
 =item --inputs_path=<path>
 

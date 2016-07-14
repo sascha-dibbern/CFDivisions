@@ -25,15 +25,29 @@ CFDivisions
 
 =head1 DESCRIPTION
 
-CFDivision is enabling the usage of CFengine promises libraries within a component-framework. 
+CFDivision is enabling the usage of CFengine promises libraries within a component-framework, where promises and their depencencies can be structured more coherent. Programming configuration management based on divisions follows a declarative approach of 'divide and conquere'.
 
 =head1 Elements in CFDivisions
 
-B<CFDivisions> introduces some new concepts to the organization of CFEngine code and functionality.
+B<CFDivisions> introduces some new concepts to the organization and structure of CFEngine code and functionality.
 
 =head2 Division
 
-A B<division> is a selfcontaining component. Divisions can be dependend on other divisions. Divisions define their own local bundlesequence and ensure their own namespace for certain structural classes and variables. A division can contain its own resources.
+A B<division> is a selfcontaining component with capabilities as: 
+
+=over
+
+=item Runtime encapsulation 
+
+Divisions encapsulate their runtime behaviour by defining their own local bundlesequence to control execution their own bundles. 
+
+=item Declarative dependencies
+
+Divisions can depend on other divisions. CFengine code structured as divisions enables the building of configurations in a stacked design represented a dependency graph. Promises of higher stacked divisions logically will build upon the promises of lower stacked divisions. 
+
+=item Configuration containment
+
+Divisions can use their own namespace to scope structural classes and variables. A division can manage, address and contain its own resources.
 
 =head2 Division promises file
 
@@ -65,7 +79,7 @@ As a scope identifier
 
 =head1 Motivation
 
-The standard way of reading promises files and executing interdependent bundles in CFEngine is quite simple. The developer has only one main bundlesequence, and as alternative he has to resolve into calling other bundles from the calling bundles own methode section. This could easily lead to complex monolithic executions structures that are hard to maintain and test (like using mockup promises). It is also harder to reuse CFEngine-code as distributeable packages/libraries for others to CFEngine implementations. B<cfdivision> is an attempt to distribute the role of the central bundlesequence out into B<divisions> (metaphor for packages, components or alike structures in other languages).
+The standard way of reading promises files and executing interdependent bundles in CFEngine is really procedural. The developer has only one main bundlesequence, and as alternative he has to resolve into calling other bundles from the calling bundles own methode section. This could easily lead to complex monolithic executions structures that are hard to maintain and test (like using mockup promises). It is also harder to reuse CFEngine-code as distributeable packages/libraries for others to CFEngine implementations. B<cfdivision> is an attempt to distribute the role of the central bundlesequence out into B<divisions>. A division can in other programming languages seen as packages, components or other alike structures.
 
 =head1 Tips and recommendations
 
@@ -77,11 +91,11 @@ For better readabillity and easier maintenance of bundles defined in division pr
 
 Example: Bundle C<content> in organized under division C</webservers/www.mysite.com> (canonized name C<webservers_www_mysite_com>) could be named instead to C<webservers_www_mysite_com_content>.
 
-=head2 Resources in divisions (code and data)
+=head2 Resources in divisions (data artefacts)
 
 It can be an good idea to place resources (template text files, ...) into the same division folder with the promises that are using them. The divisions path (basepath and local path or full path) can be used identify the path to the resources.
 
-=head2 Failsafe mechanism (TODO: rewrite)
+=head2 Failsafe mechanism (TODO: rewrite or remove)
 
 Divisions can contain failsafe promises that could be called from C<failsafe.cf>. By creating special C<division-failsafe.cf> files in the divisions and refering to the from central C<failsafe.cf> file.
 
@@ -132,15 +146,23 @@ sub new {
 	"library:s"         => \$args{library},
 	"library_subdir:s"  => \$args{library_subdir},
 	"namespace:s"       => \$args{namespace},
+	"ignore_bundles:s"  => \$args{ignore_bundles},
 	);
     
     # Default for divisionfilter is empty
     $args{divisionfilter} = $args{divisionfilter} // "";
+
+    # Default for ignore_bundles
+    $args{ignore_bundles} = $args{ignore_bundles} // "";
+
+    # Transform arguments
     my $divisionfilter = [ split /\s*,\s*/,$args{divisionfilter} ];
+    my $ignore_bundles = [ split /\s*,\s*/,$args{ignore_bundles} ];
 
     my $self  = {
 	verbose          => $args{verbose},
 	divisionfilter   => $divisionfilter,
+        ignore_bundles   => $ignore_bundles,
 	library          => $args{library},
 	library_subdir   => $args{library_subdir},
 	inputs_path      => $args{inputs_path},

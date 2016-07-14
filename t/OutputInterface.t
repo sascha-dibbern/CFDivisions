@@ -127,4 +127,15 @@ subtest "Variable strings (new namespace)" => sub {
        "bundlesequence_variable");
 };
 
+subtest "Variable strings (ignore bundles)" => sub {
+    my $oi=CFDivisions::OutputInterface->new(
+	%default_args,
+	ignore_bundles => ['bund_b'],
+	);
+
+    is($oi->bundlesequence_variable(),
+       q/@cfdivisions_lib_bundlesequence={"default:bund_a"}/,
+       "bundlesequence_variable");
+};
+
 done_testing;
