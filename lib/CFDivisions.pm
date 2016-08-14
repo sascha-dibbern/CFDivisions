@@ -15,9 +15,9 @@ use CFDivisions::Parser;
 use CFDivisions::Model;
 use CFDivisions::OutputInterface;
 
-our $class_parser = "CFDivisions::Parser";
-our $class_model  = "CFDivisions::Model";
-our $class_output = "CFDivisions::OutputInterface";
+our $default_class_parser = "CFDivisions::Parser";
+our $default_class_model  = "CFDivisions::Model";
+our $default_class_output = "CFDivisions::OutputInterface";
 
 =head1 NAME
 
@@ -168,6 +168,9 @@ sub new {
 	inputs_path      => $args{inputs_path},
 	namespace        => $args{namespace},
 	output           => [],
+	class_parser     => "CFDivisions::Parser",
+	class_model      => "CFDivisions::Model",
+	class_output     => "CFDivisions::OutputInterface",
     };
 
     bless $self, $class;
@@ -185,7 +188,7 @@ sub parser {
     my $parser  = $self->{parser};
     return $parser if defined $parser;
 
-    $parser = $class_parser->new(
+    $parser = $self->{class_parser}->new(
 	verbose             => $verbose,
 	inputs_path         => $self->{inputs_path},
 	library             => $self->{library},
@@ -223,7 +226,7 @@ sub model {
     my $model   = $self->{model};
     return $model if defined $model;
 
-    $model = $class_model->new(
+    $model = $self->{class_model}->new(
 	verbose        => $verbose,
 	divisionfilter => $self->{divisionfilter},
 	divisions      => scalar $self->parser->divisions(),
@@ -257,7 +260,7 @@ sub output_interface {
     my $oi      = $self->{oi};
     return $oi if defined $oi;
 
-    $oi=$class_output->new(
+    $oi=$self->{class_output}->new(
 	verbose        => $verbose,
 	parser         => $self->parser,
 	model          => $self->model,

@@ -114,6 +114,7 @@ sub new {
     my $divisions       = $args{divisions};
     my $divisionpaths   = $args{divisionpaths};
     my $bundlesequences = $args{bundlesequences};
+    my $dependencies    = $args{dependencies};
 
     if (defined $parser) {
 	$library         = $library
@@ -126,6 +127,8 @@ sub new {
 	    // scalar $parser->divisionpaths();
 	$bundlesequences = $bundlesequences
 	    // scalar $parser->bundlesequences();
+	$dependencies    = $dependencies
+	    // { $parser->dependencies() };
     }
 
     my $divisionorder = $args{divisionorder};
@@ -141,6 +144,7 @@ sub new {
     $divisions       // croak('No divisions defined');
     $divisionpaths   // croak('No divisionpaths defined');
     $divisionorder   // croak('No divisionorder defined');
+    $dependencies    // croak('No dependencies defined');
 
     croak "'bundlesequences' is not a HASHREF" 
 	unless ref($bundlesequences) eq "HASH"; 
@@ -150,18 +154,21 @@ sub new {
 	unless ref($divisionpaths) eq "HASH"; 
     croak "'divisionorder' is not a ARRAYREF" 
 	unless ref($divisionorder) eq "ARRAY"; 
+    croak "'dependencies' is not a HASHREF" 
+	unless ref($dependencies) eq "HASH"; 
 
     my $self = {
 	verbose         => $verbose,
 	comments        => $comments,
         ignore_bundles  => $ignore_bundles  // [],
 	namespace       => $namespace       // 'default',
-	library         => $library         // croak('No library defined'),
-	basedir         => $basedir         // croak('No basedir defined'),
-	bundlesequences => $bundlesequences // croak('No bundlesequences defined'),
-	divisions       => $divisions       // croak('No divisions defined'),
-	divisionpaths   => $divisionpaths   // croak('No divisionpaths defined'),
-	divisionorder   => $divisionorder   // croak('No divisionorder defined'),
+	library         => $library,
+	basedir         => $basedir,
+	bundlesequences => $bundlesequences,
+	divisions       => $divisions,
+	divisionpaths   => $divisionpaths,
+	divisionorder   => $divisionorder,
+	dependencies    => $dependencies,
     };
 
     bless $self, $class;

@@ -15,8 +15,8 @@ my %default_args=(
     library         => 'lib',
     basedir         => '/basedir',
     bundlesequences => {
-	a=>['bund_a'],
-	b=>['bund_b'],
+	a     => ['bund_a'],
+	b     => ['bund_b'],
     },
     divisions   => {
 	a=>'lib/path_a',
