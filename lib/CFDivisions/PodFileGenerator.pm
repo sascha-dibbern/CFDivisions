@@ -18,9 +18,9 @@ sub new {
     my $class = shift;
     my %args  = @_;
 
-    my $self        = CFDivisions::OutputInterface->new(%args);
-    my $poddir      = $args{poddir} // croak('No basedir defined');
-    $self->{poddir} = $poddir;
+    my $self         = CFDivisions::OutputInterface->new(%args);
+    my $pod_dir      = $args{pod_dir} // croak('No POD directory defined');
+    $self->{pod_dir} = $pod_dir;
 
     bless $self, $class;
     return $self;
@@ -139,8 +139,8 @@ sub pod_path {
     my $division = shift;
 
     return File::Spec->catfile(
-	$self->{poddir},
-	$self->{namespace}.':'.$division.".pod",
+	$self->{pod_dir},
+	$self->{library}.':'.$division.".pod",
 	);
 }
 
