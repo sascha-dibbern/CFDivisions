@@ -1,0 +1,17 @@
+#!/usr/bin/perl -w
+
+# PODNAME: cfdivisions
+# ABSTRACT: A CFEngine3 module for using a component based promise management
+
+use strict;
+use warnings;
+use v5.14;
+
+use lib ('/var/cfengine/modules/perl5');
+
+use CFDivisions;
+
+my $cfd=CFDivisionsPods->new();
+$cfd->run();
+$cfd->print_output();
+
