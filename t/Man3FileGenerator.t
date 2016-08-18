@@ -45,3 +45,5 @@ subtest "Constructor" => sub {
 	    );
     } "Argumentative constructor";
 };
+
+done_testing();

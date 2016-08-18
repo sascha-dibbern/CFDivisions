@@ -25,7 +25,7 @@ CFDivisions
 
 =head1 DESCRIPTION
 
-CFDivision is enabling the usage of CFengine promises libraries within a component-framework, where promises and their depencencies can be structured more coherent. Programming configuration management based on divisions follows a declarative approach of 'divide and conquere'.
+CFDivision enables the usage of CFengine promises libraries within a component-framework, where promises and their depencencies can be structured more coherent. Programming configuration management based on divisions follows a declarative approach of a 'divide and conquere'-strategy, where dependencies are clearly defined.
 
 =head1 Elements in CFDivisions
 

@@ -44,7 +44,10 @@ sub new {
     my $class = shift;
     my %args  = @_;
 
-    my $self        = CFDivisions::PodFileGenerator->new(%args);
+    my $self        = CFDivisions::PodFileGenerator->new(
+	%args,
+	pod_dir => '/tmp',
+	);
     my $input       = $args{input}; 
     $self->{input}  = \$input;
     my $output      = "";
@@ -80,12 +83,14 @@ subtest "Constructor" => sub {
     lives_ok {
 	$pfg=CFDivisions::PodFileGenerator->new(
 	    %default_args,
+	    pod_dir => '/tmp',
 	    );
     } "Argumentative constructor";
 
     lives_ok {
 	$pfg=TestGenerator->new(
 	    %default_args,
+	    pod_dir => '/tmp',
 	    );
     } "Testgenerator: Argumentative constructor";
 

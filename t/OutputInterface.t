@@ -27,6 +27,7 @@ my %default_args=(
 	b=>'/root/lib/path_b',
     },
     divisionorder   => ['a','b'],
+    dependencies    => {},
 );
 
 subtest "Constructor" => sub {
