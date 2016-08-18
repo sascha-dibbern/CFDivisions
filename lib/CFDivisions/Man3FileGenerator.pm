@@ -1,6 +1,6 @@
 package CFDivisions::Man3FileGenerator;
 
-# ABSTRACT: Generate POD files out of the CFEngine 'cfdivisions' model
+# ABSTRACT: Generate man3 files out of the division-POD-files
 
 use strict;
 use warnings;

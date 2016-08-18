@@ -15,3 +15,98 @@ my $cfd=CFDivisionsDoc->new();
 $cfd->run();
 $cfd->print_output();
 
+=pod
+
+=head1 NAME
+
+cfdivisionsdoc - A CFDivision documentation tool
+
+=head1 SYNOPSIS
+
+cfdivisions [--inputs_path inputspath] [--library library] [] [--library_subdir dir] [--verbose]
+
+=head1 DESCRIPTION
+
+Generate POD and man3 documentation for divisions in a division-library.
+
+=head1 OPTIONS
+
+=over
+
+=item --divisionfilter=<division1>,<division2>,...
+
+Names of divisions to proces only. Other divisions that the filtered division are dependend on are also processed.
+
+=item --ignore_bundles=<bundle1>,<bundle2>,...
+
+Names of bundles that are ignored in the generated bundlesequence.
+
+=item --inputs_path=<path>
+
+Alternative path to the CFEngines inputs-folder
+
+=item --library=<name>
+
+Name of the library. If no library is defined the default is 'division'.
+
+=item --library_subdir=<subdirectory name>
+
+Directory name of the placement of divisions within the cfengines inputs-folder.
+
+=item --man3_dir=<absolute directory path for man3 files>
+
+Directory to create POD files. Defaults for
+
+=over
+
+=item root user: /var/cfengine/share/man3
+
+=item other users: $HOME/.cfagent/share/man3
+
+=back
+
+=item --namespace=<namespace>
+
+The namespace for the whole libraries artifacts.
+
+=item --pod_dir=<absolute directory path for POD files>
+
+Directory to create POD files. Defaults for
+
+=over
+
+=item root user: /var/cfengine/share/pod
+
+=item other users: $HOME/.cfagent/share/pod
+
+=back
+
+=item --verbose
+
+Show more info when generating artefacts
+
+=back
+
+=head1 See also
+
+=over
+
+=item The conceptual overview
+
+L<'CFDivisions'|CFDivisions> 
+
+=item Examples
+
+L<'CFDivisions-examples'|CFDivisions-examples> 
+
+=item Content of a division promises file
+
+L<'division-promises.cf'|division-promises.cf>
+
+=back
+
+=head1 Authors 
+
+L<Sascha Dibbern|http://sascha.dibbern.info/> (sascha@dibbern.info) 
+
+=cut

@@ -1,6 +1,6 @@
 package CFDivisionsDoc;
 
-# ABSTRACT: Enable modularized CFEngine script configuration
+# ABSTRACT: Generate POD and man3 documentation from division-promise files
 
 use strict;
 use warnings;
@@ -103,8 +103,6 @@ sub man3_generator {
 	verbose        => $verbose,
 	parser         => $self->parser,
 	model          => $self->model,
-#	namespace      => $self->{namespace},
-#        ignore_bundles => $self->{ignore_bundles},
 	pod_dir        => $self->{pod_dir},
 	man3_dir       => $man3_dir,
 	);
