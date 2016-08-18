@@ -1,4 +1,4 @@
-package CFDivisions;
+package CFDivisionsDoc;
 
 # ABSTRACT: Enable modularized CFEngine script configuration
 
@@ -14,12 +14,19 @@ use File::Spec;
 use parent 'CFDivisions';
 use CFDivisions::Utils;
 
-our $class_parser = "CFDivisions::Parser";
-our $class_model  = "CFDivisions::Model";
-our $class_output = "CFDivisions::OutputInterface";
+our $default_pod_dir = "/var/cfengine/share/pod";
+our $default_man_dir = "/var/cfengine/share/man";
 
-# TODO: make user-context sensitive
-our $default_pod_dir = "/var/cfengine/pod";
+# In case of nonroot user
+my $login = getlogin || getpwuid($<) || "root";
+unless ($login eq 'root') {
+    my $share_dir    = File::Spec->catfile($ENV{HOME},"share");
+    $default_pod_dir = File::Spec->catfile($share_dir,"pod");
+    $default_man_dir = File::Spec->catfile($share_dir,"man");
+}
+
+use CFDivisions::PodFileGenerator;
+use CFDivisions::Man3FileGenerator;
 
 sub new {
     my $class = shift;
@@ -28,17 +35,18 @@ sub new {
     my $self=CFDivisions->new(%args);
 
     GetOptions (
-	"pod_dir:s" => \$args{pod_dir},
+	"pod_dir:s" => \$args{pod_dir} ,
+	"man_dir:s" => \$args{man_dir},
 	);
     
-    $pod_dir = File::Spec->catfile(
-	$args{pod_dir} // $default_pod_dir,
-	$self->library,
-	);
-    mkdir $pod_dir unless (-d $pod_dir);
+    my $pod_dir = $args{pod_dir} // $default_pod_dir;
+    my $man_dir = $args{man_dir} // $default_man_dir;
 
-    $self->{pod_dir}             = $pod_dir;
-    $self->{pod_generator_class} = "CFDivisions::PodFileGenerator";
+    $self->{pod_dir} = $pod_dir;
+    $self->{man_dir} = $man_dir;
+
+    $self->{pod_generator_class}  = "CFDivisions::PodFileGenerator";
+    $self->{man3_generator_class} = "CFDivisions::Man3FileGenerator";
     
     bless $self, $class;
 }
@@ -67,6 +75,8 @@ sub pod_generator {
 sub generate_pods {
     my $self   = shift;
 
+    mkdir $self->{pod_dir} unless (-d $self->{pod_dir});
+
     eval {
 	$self->pod_generator->run;
     };
@@ -79,12 +89,11 @@ sub generate_pods {
 sub man3_generator {
     my $self = shift;
 
-    my $cfe_share_dir = "/var/cfengine/share";
-    my $man_dir       = File::Spec->catfile($cfe_share_dir,'man');
-    my $man3_dir      = File::Spec->catfile($man_dir,'man3');
+    my $man_dir  = $self->{man_dir};
+    mkdir $man_dir unless (-d $man_dir);
 
-    mkdir $man_dir;
-    mkdir $man3_dir;
+    my $man3_dir = File::Spec->catfile($man_dir,'man3');
+    mkdir $man3_dir unless (-d $man3_dir);
 
     my $verbose = $self->{verbose};
     my $gen     = $self->{man3_generator};
@@ -107,7 +116,6 @@ sub man3_generator {
 sub generate_man3 {
     my $self   = shift;
 
-
     eval {
 	$self->man3_generator->run;
     };
@@ -121,8 +129,8 @@ sub generate_man3 {
 sub generate_output {
     my $self   = shift;
 
-    print "+POD_OK_". $self->parser->library() unless $self->{pod_error};
-    print "+MAN3_OK_".$self->parser->library() unless $self->{man3_error};
+    say "+".$self->parser->library()."_POD_OK"  unless $self->{pod_error};
+    say "+".$self->parser->library()."_MAN3_OK" unless $self->{man3_error};
 }
 
 sub run {

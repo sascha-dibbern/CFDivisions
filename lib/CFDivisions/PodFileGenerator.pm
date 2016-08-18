@@ -96,38 +96,44 @@ sub make_pod_from_division {
     push @head,"=back\n";
 
     # All direct divisions to be loaded until this division
-    my @direct_dep = @{$self->{dependencies}->{$division}};
-    push @head,"=head1 Depends direcly on divisions\n";
-    push @head,"=over\n";
-    for my $dependency (@direct_dep) {
-	push @head,'=item L<"'.$library.':'.$dependency.'">'."\n";
+    my @direct_dep       = @{$self->{dependencies}->{$division}};
+    my $direct_dep_count = @direct_dep;
+    if ($direct_dep_count > 0) {
+	push @head,"=head1 Depends direcly on divisions\n";
+	push @head,"=over\n";
+	for my $dependency (@direct_dep) {
+	    push @head,'=item L<"'.$library.':'.$dependency.'">'."\n";
+	}
+	push @head,"=back\n";
     }
-    push @head,"=back\n";
-
     
     # All divisions be loaded until this division
-    my $up_til_same_division = 0;
+    my $up_til_same_division      = 0;
     my @all_division_dependencies = grep {
 	$up_til_same_division = 1 if $_ eq $division; 
 	! $up_til_same_division
     } @{$self->{divisionorder}};
-    push @head,"=head1 Division stack\n";
-    push @head,"Depend overall on divisions and bundles\n";
-    push @head,"=over\n";
-    for my $dependency (reverse @all_division_dependencies) {
-	push @head,'=item Division: L<"'.$library.':'.$dependency.'">'."\n";
-
+    my $all_division_dependencies_count = @all_division_dependencies;
+    if ($all_division_dependencies_count > 0) {
+	push @head,"=head1 Division stack\n";
+	push @head,"Depend overall on divisions and bundles\n";
 	push @head,"=over\n";
-	for my $bundle (@{$self->{bundlesequences}->{$dependency}}) {
-	    push @head,'=item L<"'.$namespace.':'.$bundle.'"|'.$dependency.'/"'.$bundle.'"'.">\n";
+	for my $dependency (reverse @all_division_dependencies) {
+	    push @head,'=item Division: L<"'.$library.':'.$dependency.'">'."\n";
+	    
+	    push @head,"=over\n";
+	    for my $bundle (@{$self->{bundlesequences}->{$dependency}}) {
+		push @head,'=item L<"'.$namespace.':'.$bundle.'"|'.$dependency.'/"'.$bundle.'"'.">\n";
+	    }
+	    push @head,"=back\n";
 	}
 	push @head,"=back\n";
     }
-    push @head,"=back\n";
 
     # End POD HEAD
     push @head,"=cut\n";
 
+    # POD-string extracted from comments in promises-file
     my $promises_lines = $self->read_division_promises_file($path);
     my @lines          = (@head,@{$self->extract_pod_string($promises_lines)});
     
