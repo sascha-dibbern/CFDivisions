@@ -48,7 +48,7 @@ sub man3_path {
     my $division = shift;
 
     return File::Spec->catfile(
-	$self->{pod_dir},
+	$self->{man3_dir},
 	$self->{library}.':'.$division.".3",
 	);
 }
@@ -66,7 +66,7 @@ sub transform_pod_to_man3 {
 sub run {
     my $self = shift;
 
-    my %divisions = $self->{divisions};
+    my %divisions = %{$self->{divisions}};
 
     for my $division (keys %divisions) {
 	$self->transform_pod_to_man3($division);
