@@ -65,15 +65,13 @@ or by yum, when the rpm is placed in accessible youm repository
 
 When using this method it is important to direct installation towards CFEngines modules directory (/var/cfengine/modules)
 
-# Build and deploy the standard Perl way
-
-# Building the binary package (.tar.gz)
+## Building the binary package (.tar.gz)
 
     > perl Makefile.PL
     > make test
     > make
 
-# Install the binary package
+## Install the binary package
 
 Unpack the .tar.gz file an install the module in CFEngines modules destination 
 
@@ -85,4 +83,6 @@ Unpack the .tar.gz file an install the module in CFEngines modules destination
 
 # AUTHORS
 
- *  Sascha Dibbern [sascha@dibbern.info] (http://sascha.dibbern.info/)
+ *  Sascha Dibbern [http://sascha.dibbern.info/](http://sascha.dibbern.info/)
+     email: sascha at dibbern.info
+
