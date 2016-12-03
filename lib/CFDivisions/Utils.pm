@@ -15,6 +15,7 @@ our @EXPORT = qw(
     errors 
     add_error 
     assert_cfengine_identifier
+    speak
 ); 
 
 sub canonize_divisionname {
@@ -53,5 +54,16 @@ sub assert_cfengine_identifier {
     return $identifier;
 }
 
+sub speak {
+    my $text    = shift;
+    my $verbose = shift;
+    
+    return unless $verbose;
 
+    my @lines     = split /\n/,$text;
+    my @commented = map { "# ".$_ } @lines;
+    
+    say join('',@commented);
+}
+ 
 1;

@@ -211,12 +211,10 @@ sub parse {
     croak "Errors while parsing:\n".join("\n",errors()) 
 	if errors();
 
-    if ($verbose) {
-	say "Bundlesequences:\n".Dumper(scalar $parser->bundlesequences);
-	say "Divisions:\n"      .Dumper(scalar $parser->divisions);
-	say "Divisionpaths:\n"  .Dumper(scalar $parser->divisionpaths);
-	say "Dependencies:\n"   .Dumper(scalar $parser->dependencies);
-    }
+    speak("Bundlesequences:\n".Dumper(scalar $parser->bundlesequences),$verbose);
+    speak("Divisions:\n"      .Dumper(scalar $parser->divisions),      $verbose);
+    speak("Divisionpaths:\n"  .Dumper(scalar $parser->divisionpaths),  $verbose);
+    speak("Dependencies:\n"   .Dumper(scalar $parser->dependencies),   $verbose);
 }
 
 sub model {
@@ -247,10 +245,8 @@ sub build_model {
     croak "Errors while building model:\n".join("\n",errors()) 
 	if errors();
 
-    if ($verbose) {
-	say "Divisionorder:";
-	say Dumper($divisionorder);
-    }
+    speak("Divisionorder:",      $verbose);
+    speak(Dumper($divisionorder),$verbose);
 }
 
 sub output_interface {

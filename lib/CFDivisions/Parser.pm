@@ -20,6 +20,7 @@ sub new {
 
     my $user  = getlogin || getpwuid($<);
 
+    # TODO: make Windows-compatible input-folder-lookup
     # Default CFEngine input-folder behaviour
     my $default_inputs_path = "/var/cfengine/inputs";
     unless ($user eq 'root') {
@@ -37,7 +38,6 @@ sub new {
 	dependencies                => {},
 	parsed_bundlesequence_token => undef,
 	parsed_depends_token        => undef,
-
 
 	inputs_vol                  => $inputs_vol,	
 	inputs_dir                  => $inputs_dir,	
@@ -152,9 +152,8 @@ sub register_division_promise_file {
 }
 
 sub find_division_promise_files {
-    my $self    = shift;
+    my $self        = shift;
 
-    my $verbose     = $self->{verbose};
     my $handle_file = sub  {
 	eval {
 	    $self->register_division_promise_file($File::Find::dir,$_);
@@ -166,10 +165,9 @@ sub find_division_promise_files {
 
     find($handle_file, $self->{basedir});
 
-    if ($verbose) {
-	say "Division promise files found:";
-	say Dumper($self->{divisions});
-    }
+    my $verbose = $self->{verbose};
+    speak("Division promise files found:",$verbose);
+    speak(Dumper($self->{divisions},$verbose));
 
     croak("Errors while finding division promise files:\n".join("\n",errors()))
 	if $self->errors();
@@ -197,6 +195,8 @@ sub parse_cfdivisions_bundlesequence_token {
     $self->{bundlesequences}->{$division} = \@bs;
     $self->{parsed_bundlesequence_token}  = 1;
 
+    speak(" - parsed bundlesequence: ".join(',',@bs),$self->{verbose});
+
     return 1
 }
 
@@ -222,6 +222,8 @@ sub parse_cfdivisions_depends_token {
     
     $self->{dependencies}->{$division} = \@deps;
     $self->{parsed_depends_token}      = 1;
+
+    speak(" - parsed dependencies: ".join(',',@deps),$self->{verbose});
 
     return 1;
 }
@@ -251,6 +253,8 @@ sub read_division_promise_file {
 	$DIVISION_PROMISE_FILE,
 	);
     my $line_nr = 1;
+
+    speak("Read division ($division) from promise file ($path)",$self->{verbose});
 
     open(my $fh,"<",$path) || croak("Could not open division promise file: $path");
     while (<$fh>) {
