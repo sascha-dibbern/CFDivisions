@@ -57,7 +57,7 @@ On the CFEngine hubserver the rpm can be install either by the rpm-tool
 
     > rpm -i CFDivisions-<version>.noarch.rpm
 
-or by yum, when the rpm is placed in accessible youm repository
+or by yum, when the rpm is placed in accessible your repository
 
     > yum install CFDivisions
 
