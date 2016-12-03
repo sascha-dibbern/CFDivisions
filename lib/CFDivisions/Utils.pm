@@ -63,7 +63,7 @@ sub speak {
     my @lines     = split /\n/,$text;
     my @commented = map { "# ".$_ } @lines;
     
-    say join('',@commented);
+    say join("\n",@commented);
 }
  
 1;
