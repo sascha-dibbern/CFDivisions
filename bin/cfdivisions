@@ -19,7 +19,7 @@ $cfd->print_output();
 
 =head1 NAME
 
-cfdivisions - A CFEngine3 module for using a component based promise management.
+cfdivisions - A CFEngine3 module for organizing promises in a modular and goal intention based structure.
 
 =head1 SYNOPSIS
 
@@ -27,8 +27,16 @@ cfdivisions [--inputs_path inputspath] [--library library] [] [--library_subdir 
 
 =head1 DESCRIPTION
 
-A CFEngine3 module for handling CFEngine components called L<CFDivisions>. 
-This ensures the generation of a consistent promisefile load sequence (under "body common control" / "inputs") and a consistent bundlesequence over all divisions inside a division library.
+C<cfdivisions> is a CFEngine3 module for handling CFEngine modules called L<CFDivisions>. 
+It ensures the generation of 
+
+=over
+
+=item * a consistent promisefile load sequence (C<body common control> / C<inputs>) and 
+
+=item * a consistent bundlesequence (C<body common control> / C<bundlesequence>) over all sequenceable bundles inside a division library.
+
+=back
 
 =head1 OPTIONS
 
@@ -36,7 +44,7 @@ This ensures the generation of a consistent promisefile load sequence (under "bo
 
 =item --divisionfilter=<division1>,<division2>,...
 
-Names of divisions to proces only. Other divisions that the filtered division are dependend on are also processed.
+A positive filter that defines names the only divisions to proces. Divisions that the filtered division are dependend on are implicit also processed.
 
 =item --ignore_bundles=<bundle1>,<bundle2>,...
 
@@ -52,15 +60,17 @@ Name of the library. If no library is defined the default is 'division'.
 
 =item --library_subdir=<subdirectory name>
 
-Directory name of the placement of divisions within the cfengines inputs-folder.
+Alternative directory name of the placement of divisions within the cfengines inputs-folder.
+The library name is used as a default.
 
 =item --namespace=<namespace>
 
 The namespace for the whole libraries artifacts.
+The library name is used as a default.
 
 =item --verbose
 
-Show more info when generating artefacts
+Show more info when generating artefacts. Verbose out will be written at CFengine comments.
 
 =back
 
@@ -70,17 +80,21 @@ Show more info when generating artefacts
 
 =item The conceptual overview
 
-L<'CFDivisions'|CFDivisions> 
+L<'CFDivisions concept'|CFDivisions-concept> 
 
 =item Examples
 
-L<'CFDivisions-examples'|CFDivisions-examples> 
+L<'CFDivisions-example'|CFDivisions-example> 
 
 =item Content of a division promises file
 
 L<'division-promises.cf'|division-promises.cf>
 
 =back
+
+=head1 Project
+
+L<CFDivisions on github.com|https://github.com/sascha-dibbern/CFDivisions/>
 
 =head1 Authors 
 
