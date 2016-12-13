@@ -479,7 +479,7 @@ L<'CFDivisions concept'|CFDivisions-concept>
 
 L<'division-promises.cf'|division-promises.cf>
 
-=item  The CFEngine module for CFDivisions
+=item The CFEngine module for CFDivisions
 
 L<'cfdivisions'|cfdivisions>
 

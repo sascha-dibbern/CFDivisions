@@ -2,7 +2,8 @@
 
 # DESCRIPTION
 
-CFDivision enables the usage of CFengine promises libraries within a component-framework, where promises and their depencencies can be structured more coherent. Programming configuration management based on divisions follows a declarative approach of a 'divide and conquere'-strategy, where dependencies are clearly defined.
+CFDivisions enables the usage of CFengine promises in libraries based in a modular and goal intention based structure.
+Programming configuration management based on divisions follows a declarative approach of a 'divide and conquere'-strategy, where dependencies are clearly defined.
 
 # DISTRIBUTION
 
@@ -60,6 +61,15 @@ On the CFEngine hubserver the rpm can be install either by the rpm-tool
 or by yum, when the rpm is placed in accessible your repository
 
     > yum install CFDivisions
+
+# More documentation
+
+Unix man-pages or perldoc-pages exists about following themes 
+
+  * CFDivisions-concept : The conceptual overview
+  * cfdivisions : The CFEngine module for CFDivisions
+  * division-promises.cf : Content of a division promises file
+  * CFDivisions-example : An example of using CFDivisions
 
 # Build and deploy by traditional Makefile.PL approach
 

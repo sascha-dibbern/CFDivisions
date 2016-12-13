@@ -27,6 +27,15 @@ Other requirements:
   * the tool 'rpmbuild'
   * an valid rpmbuild-directory setup
 
+# More documentation
+
+Unix man-pages or perldoc-pages exists about following themes 
+
+  * CFDivisions-concept : The conceptual overview
+  * cfdivisions : The CFEngine module for CFDivisions
+  * division-promises.cf : Content of a division promises file
+  * CFDivisions-example : An example of using CFDivisions
+
 # Build, release and deploy as rpm with Dist::Zilla
 
 ## Build base-package
