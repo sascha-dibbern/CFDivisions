@@ -62,15 +62,6 @@ or by yum, when the rpm is placed in accessible your repository
 
     > yum install CFDivisions
 
-# More documentation
-
-Unix man-pages or perldoc-pages exists about following themes 
-
-  * CFDivisions-concept : The conceptual overview
-  * cfdivisions : The CFEngine module for CFDivisions
-  * division-promises.cf : Content of a division promises file
-  * CFDivisions-example : An example of using CFDivisions
-
 # Build and deploy by traditional Makefile.PL approach
 
 When using this method it is important to direct installation towards CFEngines modules directory (/var/cfengine/modules)
@@ -91,8 +82,26 @@ Unpack the .tar.gz file an install the module in CFEngines modules destination
     > make test
     > make install
 
+# SEE ALSO
+
+Unix man-pages are generated or perldoc-pages in source code can be browsed about following themes 
+
+  * CFDivisions-concept : The conceptual overview and introduction to CFDivisions
+  * CFDivisions-example : An example of using CFDivisions
+  * cfdivisions : The CFEngine module for CFDivisions
+  * cfdivisionsdoc : Generating perldoc-files and man-pages from division-promises-files 
+  * division-promises.cf : Content of a division promises file
+
+## CFDivisions libraries and examples
+  * [dibbern_info_divisions](https://github.com/sascha-dibbern/common_divisions) : A collection og generic reusable code to build configuration stacks
+  * [dibbern_info_divisions](https://github.com/sascha-dibbern/dibbern_info_divisions) : An example CFDivisions library build upon *common_divisions*
+
+# LICENSE
+
+See LICENSE file.
+
 # AUTHORS
 
  *  Sascha Dibbern [http://sascha.dibbern.info/](http://sascha.dibbern.info/)
-     email: sascha at dibbern.info
+    (email: sascha at dibbern.info)
 

@@ -19,7 +19,7 @@ $cfd->print_output();
 
 =head1 NAME
 
-cfdivisionsdoc - A CFDivision documentation tool
+cfdivisionsdoc - A CFDivisions documentation tool
 
 =head1 SYNOPSIS
 
@@ -27,7 +27,7 @@ cfdivisions [--inputs_path inputspath] [--library library] [] [--library_subdir 
 
 =head1 DESCRIPTION
 
-Generate POD and man3 documentation for divisions in a division-library.
+Generate POD and man3 documentation from divisions in a divisions-library.
 
 =head1 OPTIONS
 

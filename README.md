@@ -2,7 +2,8 @@
 
 # DESCRIPTION
 
-CFDivision enables the usage of CFengine promises libraries within a component-framework, where promises and their depencencies can be structured more coherent. Programming configuration management based on divisions follows a declarative approach of a 'divide and conquere'-strategy, where dependencies are clearly defined.
+CFDivisions enables the usage of CFengine promises in libraries based in a modular and goal intention based structure.
+Programming configuration management based on divisions follows a declarative approach of a 'divide and conquere'-strategy, where dependencies are clearly defined.
 
 # DISTRIBUTION
 
@@ -26,15 +27,6 @@ Installation of Perl-packages
 Other requirements:
   * the tool 'rpmbuild'
   * an valid rpmbuild-directory setup
-
-# More documentation
-
-Unix man-pages or perldoc-pages exists about following themes 
-
-  * CFDivisions-concept : The conceptual overview
-  * cfdivisions : The CFEngine module for CFDivisions
-  * division-promises.cf : Content of a division promises file
-  * CFDivisions-example : An example of using CFDivisions
 
 # Build, release and deploy as rpm with Dist::Zilla
 
@@ -90,8 +82,26 @@ Unpack the .tar.gz file an install the module in CFEngines modules destination
     > make test
     > make install
 
+# SEE ALSO
+
+Unix man-pages are generated or perldoc-pages in source code can be browsed about following themes 
+
+  * CFDivisions-concept : The conceptual overview and introduction to CFDivisions
+  * CFDivisions-example : An example of using CFDivisions
+  * cfdivisions : The CFEngine module for CFDivisions
+  * cfdivisionsdoc : Generating perldoc-files and man-pages from division-promises-files 
+  * division-promises.cf : Content of a division promises file
+
+## CFDivisions libraries and examples
+  * [dibbern_info_divisions](https://github.com/sascha-dibbern/common_divisions) : A collection og generic reusable code to build configuration stacks
+  * [dibbern_info_divisions](https://github.com/sascha-dibbern/dibbern_info_divisions) : An example CFDivisions library build upon *common_divisions*
+
+# LICENSE
+
+See LICENSE file.
+
 # AUTHORS
 
  *  Sascha Dibbern [http://sascha.dibbern.info/](http://sascha.dibbern.info/)
-     email: sascha at dibbern.info
+    (email: sascha at dibbern.info)
 
