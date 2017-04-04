@@ -63,7 +63,10 @@ sub promises_file_path {
     my $self     = shift;
     my $division = shift;
 
-    return $self->{divisionpaths}->{$division};
+    return File::Spec->catfile(
+	$self->{divisionpaths}->{$division},
+	"/division-promises.cf"
+	);
 }
 
 sub make_pod_from_division {
@@ -72,10 +75,10 @@ sub make_pod_from_division {
 
     my $namespace = $self->{namespace};
     my $library   = $self->{library};
-    my $path      = $self->promises_file_path($division);
+
+    # Header section
 
     my @head;
-#    push @head,"=pod";
 
     push @head,"=head1 Division name\n";
     push @head,$division."\n";
@@ -94,17 +97,27 @@ sub make_pod_from_division {
 	push @head,'=item L<"'.$namespace.':'.$bundle.'"|/"'.$bundle.'"'.">\n";
     }
     push @head,"=back\n";
+    
+    # Body section
+
+    # POD-string extracted from comments in promises-file
+    my $path      = $self->promises_file_path($division);
+    my $all_lines = $self->read_division_promises_file($path);
+    my $body      = $self->extract_pod_string($all_lines);
+
+    # Footer section
+    my @footer;
 
     # All direct divisions to be loaded until this division
     my @direct_dep       = @{$self->{dependencies}->{$division}};
     my $direct_dep_count = @direct_dep;
     if ($direct_dep_count > 0) {
-	push @head,"=head1 Depends direcly on divisions\n";
-	push @head,"=over\n";
+	push @footer,"=head1 Depends direcly on divisions\n\n";
+	push @footer,"=over\n\n";
 	for my $dependency (@direct_dep) {
-	    push @head,'=item L<"'.$library.':'.$dependency.'">'."\n";
+	    push @footer,'=item L<"'.$library.':'.$dependency.'">'."\n\n";
 	}
-	push @head,"=back\n";
+	push @footer,"=back\n\n";
     }
     
     # All divisions be loaded until this division
@@ -115,29 +128,25 @@ sub make_pod_from_division {
     } @{$self->{divisionorder}};
     my $all_division_dependencies_count = @all_division_dependencies;
     if ($all_division_dependencies_count > 0) {
-	push @head,"=head1 Division stack\n";
-	push @head,"Depend overall on divisions and bundles\n";
-	push @head,"=over\n";
+	push @footer,"=head1 Division stack\n\n";
+	push @footer,"Depend overall on divisions and bundles\n\n";
+	push @footer,"=over\n\n";
 	for my $dependency (reverse @all_division_dependencies) {
-	    push @head,'=item Division: L<"'.$library.':'.$dependency.'">'."\n";
+	    push @footer,'=item Division: L<"'.$library.':'.$dependency.'">'."\n\n";
 	    
-	    push @head,"=over\n";
+	    push @footer,"=over\n\n";
 	    for my $bundle (@{$self->{bundlesequences}->{$dependency}}) {
-		push @head,'=item L<"'.$namespace.':'.$bundle.'"|'.$dependency.'/"'.$bundle.'"'.">\n";
+		push @footer,'=item L<"'.$namespace.':'.$bundle.'"|'.$dependency.'/"'.$bundle.'"'.">\n\n";
 	    }
-	    push @head,"=back\n";
+	    push @footer,"=back\n\n";
 	}
-	push @head,"=back\n";
+	push @footer,"=back\n\n";
     }
 
     # End POD HEAD
-    push @head,"=cut\n";
+    push @footer,"=cut\n";
 
-    # POD-string extracted from comments in promises-file
-    my $promises_lines = $self->read_division_promises_file($path);
-    my @lines          = (@head,@{$self->extract_pod_string($promises_lines)});
-    
-    return join("\n",@lines);
+    return join("\n",@head,@$body,@footer);
 }
 
 sub pod_path {
