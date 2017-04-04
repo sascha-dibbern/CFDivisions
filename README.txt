@@ -3,7 +3,13 @@
 # DESCRIPTION
 
 CFDivisions enables the usage of CFengine promises in libraries based in a modular and goal intention based structure.
-Programming configuration management based on divisions follows a declarative approach of a 'divide and conquere'-strategy, where dependencies are clearly defined.
+Programming configuration management based on divisions follows a declarative approach of a 'divide and conquere'-strategy, where dependencies are clearly defined. This enables the composition of CFEngine code in an implementation-architecture like topology.
+
+# ROADMAP
+ 1. Core: CFDivision core functionality of implementation-architecture like topology in the global bundle-sequence => DONE
+ 2. Doc-engine: The basic ability to document divisions (architecture, design and code) => DONE
+ 3. Failure resilicence: Provide execution of configuration-change in case of shutdown down of services and features for system protection.
+ 4. Bundle-dependencies: Alternative to division local bundlesequences provide division local bundle-dependencies. 
 
 # DISTRIBUTION
 
@@ -94,7 +100,7 @@ Unix man-pages are generated or perldoc-pages in source code can be browsed abou
 
 ## CFDivisions libraries and examples
   * [dibbern_info_divisions](https://github.com/sascha-dibbern/common_divisions) : A collection og generic reusable code to build configuration stacks
-  * [dibbern_info_divisions](https://github.com/sascha-dibbern/dibbern_info_divisions) : An example CFDivisions library build upon *common_divisions*
+  * [dibbern_info_divisions](https://github.com/sascha-dibbern/dibbern_info_divisions) : An example CFDivisions library building upon *common_divisions*
 
 # LICENSE
 
