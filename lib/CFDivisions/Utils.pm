@@ -11,19 +11,21 @@ use Data::Dumper;
 use Exporter 'import'; 
 
 our @EXPORT = qw(
-    canonize_divisionname 
+    canonized_cfe_identifier
     errors 
     add_error 
     assert_cfengine_identifier
     speak
+    is_cfe_identifier
+    is_cfe_namespaced_identifier
 ); 
 
-sub canonize_divisionname {
+sub canonized_cfe_identifier {
     my $name = shift;
 
     $name    =~ s/\W/_/g;
-    $name    =~ s/^_+//g;
-    $name    =~ s/_+$//g;
+#    $name    =~ s/^_+//g;
+#    $name    =~ s/_+$//g;
 
     return $name
 }
@@ -46,12 +48,10 @@ sub add_error {
 sub assert_cfengine_identifier {
     my $identifier = shift;
 
-    croak "Illegal CFEngine identifier. Contains non-word characters." 
-	if $identifier=~/\W/;
-    croak "Illegal CFEngine identifier. Starting with '_'." 
-	if $identifier=~/^_/;
+    return $identifier if is_cfe_namespaced_identifier($identifier);
+    return $identifier if is_cfe_identifier($identifier);
 
-    return $identifier;
+    croak "Illegal CFEngine identifier ($identifier)." 
 }
 
 sub speak {
@@ -65,5 +65,46 @@ sub speak {
     
     say join("\n",@commented);
 }
+
+sub is_cfe_identifier { 
+    my $identifier = shift;
+
+    # Undefined identifier
+    return 0 unless defined $identifier;
  
+    # Empty identifier
+    return 0 if $identifier eq '';
+
+    # Identifier does not start with a number
+    return 0 if $identifier=~/^\d/;
+ 
+   # Identifier that does not change by canonization
+    return $identifier eq canonized_cfe_identifier($identifier);
+}
+
+sub is_cfe_namespaced_identifier {
+    my $identifier = shift;
+
+    # Undefined identifier
+    return 0 unless defined $identifier;
+
+    # Empty identifier
+    return 0 if $identifier eq '';
+
+    # Illegal number of elements
+    my @elements = split /:/,$identifier;
+    return 0 unless scalar(@elements) == 2;
+
+    # Namespace not starting with '_'
+    return 0 if $elements[0]=~/^_/;
+
+    # Assume no content change when canonized
+    my @compared = grep {
+	is_cfe_identifier($_)
+    } @elements;
+    return 1 if scalar(@compared)==scalar(@elements);
+
+    return 0;
+}
+
 1;
