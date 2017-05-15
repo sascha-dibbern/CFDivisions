@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.220     2017-05-15 16:29:33+02:00 Europe/Copenhagen
 --namespace changes to --default_namespace:
 Division local bundlesequences can now explicit deviate in namespace-usage from a default setting
 
