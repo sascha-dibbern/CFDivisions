@@ -20,7 +20,7 @@ CFDivisions based code supports an approach towards a 'divide and conquere'-stra
 
 =item 1. a top-down design (division)
 
-CFDivisions based design helps dividing the goal intentions and functional responsibilities into configuration architectural layers. Theses layers are build of modules called divisions. Divisions can dependend to each other. in this way a formal releationship between sets of goals are established. 
+CFDivisions based design helps dividing the goal intentions and functional responsibilities into configuration architectural layers. Theses layers are build of modules called divisions. Divisions can dependend to each other. In this way a formal releationship between sets of goals are established. 
 An example of the architectural layering of division and the goals defined inside the divisions could look like
 
 =over
@@ -82,7 +82,7 @@ A good design would in effect have clear vertical dependencies where the Cfengin
 
 Code execution follows the given configurations architecture, by configuring the lowest layered artefacts first and then ascending layer by layer upward through the divisions. 
 Executing in this way the program flow in Cfengine closely follows the architectural layering og the final product to be configured, thereby making it easier to understand the cause and effect when debugging the Cfengine scripts.
-Also this will lead to that a shortended execution time of reaching a maximum of fullfilled promisses. The reasons for this to happend are:  
+Also this will lead to a shortended and more efficient execution time of reaching a maximum of fullfilled promisses. The reasons for this to happend are:  
 
 =over
 
@@ -106,15 +106,21 @@ A B<division> is a selfcontaining component with capabilities as:
 
 =item Runtime encapsulation 
 
-Divisions encapsulate their runtime behaviour by defining their own local bundlesequence to control execution their own bundles. The division based bundlesequence will in execution time be injected in an optimal place to the global bundlesequence.
+Divisions encapsulate their runtime behaviour by defining their own local bundlesequence to control execution their own bundles. The division based bundlesequence will in execution time be palced in an optimal place to the global bundlesequence.
 
 =item Declarative dependencies
 
-Divisions can depend on other divisions. CFengine code structured as divisions enables the building of configurations in a layered design represented a dependency graph. Promises of higher layered divisions logically will build upon the promises of lower layered divisions. 
+Divisions can depend on other divisions within the same library. CFengine code structured as divisions enables the building of configurations in a layered design represented a dependency graph. Promises of higher layered divisions logically will therefore build upon the promises of lower layered divisions. 
 
 =item Configuration containment
 
-Divisions can use their own namespace (or a library namespace) to scope structural classes and variables. A division can manage, address and contain its own resources. 
+Divisions can use their own namespace (or library / defined default namespace) to scope structural classes and variables. A division can contain, manage, address and its own resources like
+
+=over 
+
+=item datafiles defined with division's directory in the filesystem 
+
+=item refering to classes, agent bundles and variable in it's own namespace
 
 =back
 
@@ -137,6 +143,8 @@ Divisions (container-divisions) can have nested divisions. There are no restrict
 =item * being superdivisions that require the container-division to take a sub-division role
 
 =back
+
+Nesting is just a structural tool to enhance encapsulation and separation of concerns.
 
 =head2 Division names
 

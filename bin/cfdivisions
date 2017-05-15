@@ -63,10 +63,10 @@ Name of the library. If no library is defined the default is 'division'.
 Alternative directory name of the placement of divisions within the cfengines inputs-folder.
 The library name is used as a default.
 
-=item --namespace=<namespace>
+=item --default_namespace=<namespace>
 
-The namespace for the whole libraries artifacts.
-The library name is used as a default.
+The default namespace of the bundles specified in divisions bundlesequence. 
+If not defined then the canonized library name is used as a default.
 
 =item --verbose
 

@@ -88,8 +88,8 @@ subtest "parse_cfdivisions_bundlesequence_token" => sub {
 	$bs1,
 	{
           'div1' => [
-	      'a_b',
-	      'c_d'
+	      'test:a_b',
+	      'test:c_d'
 	      ],
         },
 	'Right bundlesequence with bundles'
@@ -105,11 +105,29 @@ subtest "parse_cfdivisions_bundlesequence_token" => sub {
 	{
 	    'div2' => [],
 	    'div1' => [
-		'a_b',
-		'c_d'
+		'test:a_b',
+		'test:c_d'
 		],
         },
 	'No bundlesequence bundles'
+	);
+
+    ok($p->parse_cfdivisions_bundlesequence_token(
+	    '# *cfdivisions_bundlesequence = abc:def',
+	    'div3'
+       ),"Parse line with cfdivisions_bundlesequence containing namespaced bundles");
+    my $bs3 = $p->bundlesequences();
+    is_deeply(
+	$bs3,
+	{
+	    'div3' => ['abc:def'],
+	    'div2' => [],
+	    'div1' => [
+		'test:a_b',
+		'test:c_d'
+		],
+        },
+	'Bundlesequence with namespaced bundles'
 	);
 };
 

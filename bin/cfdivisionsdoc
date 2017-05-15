@@ -65,9 +65,10 @@ Directory to create POD files. Defaults for
 
 =back
 
-=item --namespace=<namespace>
+=item --default_namespace=<namespace>
 
-The namespace for the whole libraries artifacts.
+The default namespace of the bundles specified in divisions bundlesequence. 
+If not defined then the canonized library name is used as a default.
 
 =item --pod_dir=<absolute directory path for POD files>
 

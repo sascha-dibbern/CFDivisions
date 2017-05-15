@@ -62,7 +62,6 @@ sub pod_generator {
 	verbose        => $verbose,
 	parser         => $self->parser,
 	model          => $self->model,
-	namespace      => $self->{namespace},
         ignore_bundles => $self->{ignore_bundles},
 	pod_dir        => $self->{pod_dir},
 	);

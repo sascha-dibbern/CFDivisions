@@ -75,15 +75,15 @@ subtest "Integrationtest: Loading testlib1" => sub {
 	$bs,
 	{
 	    'div1' => [
-		'div1_b1',
-		'div1_b2',
+		'testlib1:div1_b1',
+		'testlib1:div1_b2',
 		],
 	    'div3' => [
-		    'div3_b1'
+		    'testlib1:div3_b1'
 		],
 	    'path1_div2' => [
-		'path1_div2_b1',
-		'path1_div2_b2'
+		'testlib1:path1_div2_b1',
+		'testlib1:path1_div2_b2'
 	    ],
 	},
 	"Getting bundlesequences",
@@ -127,7 +127,7 @@ subtest "Integrationtest: Loading testlib1" => sub {
 	 $scriptpath.'testlib1/div1/division-promises.cf","'.
 	 $scriptpath.'testlib1/path1/div2/division-promises.cf","'.
 	 $scriptpath.'testlib1/div3/division-promises.cf"}',
-          '@cfdivisions_testlib1_bundlesequence={"default:div1_b1","default:div1_b2","default:path1_div2_b1","default:path1_div2_b2","default:div3_b1"}',
+          '@cfdivisions_testlib1_bundlesequence={"testlib1:div1_b1","testlib1:div1_b2","testlib1:path1_div2_b1","testlib1:path1_div2_b2","testlib1:div3_b1"}',
           '=testlib1_localpath[div1]=div1',
           '=testlib1_localpath[div3]=div3',
           '=testlib1_localpath[path1_div2]=path1/div2',

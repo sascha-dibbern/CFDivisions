@@ -102,19 +102,19 @@ sub new {
     my $class = shift;
     my %args  = @_;
 
-    my $parser          = $args{parser};
-    my $model           = $args{model};
-    my $verbose         = $args{verbose};
-    my $comments        = $args{comments};
-    my $namespace       = $args{namespace};
-    my $ignore_bundles  = $args{ignore_bundles};
+    my $parser            = $args{parser};
+    my $model             = $args{model};
+    my $verbose           = $args{verbose};
+    my $comments          = $args{comments};
+    my $default_namespace = $args{default_namespace};
+    my $ignore_bundles    = $args{ignore_bundles};
 
-    my $library         = $args{library};
-    my $basedir         = $args{basedir};
-    my $divisions       = $args{divisions};
-    my $divisionpaths   = $args{divisionpaths};
-    my $bundlesequences = $args{bundlesequences};
-    my $dependencies    = $args{dependencies};
+    my $library           = $args{library};
+    my $basedir           = $args{basedir};
+    my $divisions         = $args{divisions};
+    my $divisionpaths     = $args{divisionpaths};
+    my $bundlesequences   = $args{bundlesequences};
+    my $dependencies      = $args{dependencies};
 
     if (defined $parser) {
 	$library         = $library
@@ -161,7 +161,6 @@ sub new {
 	verbose         => $verbose,
 	comments        => $comments,
         ignore_bundles  => $ignore_bundles  // [],
-	namespace       => $namespace       // 'default',
 	library         => $library,
 	basedir         => $basedir,
 	bundlesequences => $bundlesequences,
@@ -230,12 +229,11 @@ sub bundlesequence_variable {
     my %ignore_bundles = map { $_ => 1 } @{$self->{ignore_bundles}};
     my @bundlesequence = grep { ! defined $ignore_bundles{$_} } @gross_bundlesequence;
 
-    my $namespace = $self->{namespace};
+    my $bs_string = join('","',@bundlesequence);
 
-    my $bs_string = join(',',( map { '"'.$namespace.':'.$_.'"' } @bundlesequence ));
     my $library   = $self->{library};
     
-    return '@cfdivisions_'.$library.'_bundlesequence={'.$bs_string.'}';
+    return '@cfdivisions_'.$library.'_bundlesequence={"'.$bs_string.'"}';
 }
 
 sub library_basedir {

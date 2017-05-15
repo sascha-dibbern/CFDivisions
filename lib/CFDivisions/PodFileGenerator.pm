@@ -73,7 +73,6 @@ sub make_pod_from_division {
     my $self     = shift;
     my $division = shift;
 
-    my $namespace = $self->{namespace};
     my $library   = $self->{library};
 
     # Header section
@@ -86,7 +85,6 @@ sub make_pod_from_division {
     push @head,"=head1 Scope\n";
     push @head,"=over\n";
     push @head,"=item Library:   ".$library."\n";
-    push @head,"=item Namespace: ".$namespace."\n";
     push @head,"=back\n";
 
     # Division defined bundlesequence
@@ -94,7 +92,7 @@ sub make_pod_from_division {
     my @bs = @{$self->{bundlesequences}->{$division}};
     push @head,"=over\n";
     for my $bundle (@bs) {
-	push @head,'=item L<"'.$namespace.':'.$bundle.'"|/"'.$bundle.'"'.">\n";
+	push @head,'=item L<"'.$bundle.'"|/"'.$bundle.'"'.">\n";
     }
     push @head,"=back\n";
     
@@ -136,7 +134,7 @@ sub make_pod_from_division {
 	    
 	    push @footer,"=over\n\n";
 	    for my $bundle (@{$self->{bundlesequences}->{$dependency}}) {
-		push @footer,'=item L<"'.$namespace.':'.$bundle.'"|'.$dependency.'/"'.$bundle.'"'.">\n\n";
+		push @footer,'=item L<"'.$bundle.'"|'.$dependency.'/"'.$bundle.'"'.">\n\n";
 	    }
 	    push @footer,"=back\n\n";
 	}

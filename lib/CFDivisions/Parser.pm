@@ -45,6 +45,7 @@ sub new {
 	verbose                     => $args{verbose},
 	library                     => $args{library} // croak("Failed to create 'library' attribute"),
 	library_subdir              => $args{library_subdir} // $args{library},	
+        default_namespace           => $args{default_namespace} // canonized_cfe_identifier($args{library}),
     };
 
     # Defined 'basedir'
@@ -140,7 +141,7 @@ sub register_division_promise_file {
 
     my $basedir  = $self->{basedir};
     my $rel_path = File::Spec->abs2rel( $path, $basedir );
-    my $divname  = canonize_divisionname($rel_path);    
+    my $divname  = canonized_cfe_identifier($rel_path);    
 
     $self->assert_no_empty_division_name($divname,$path);
     $self->assert_no_division_name_collision($divname,$rel_path);
@@ -183,16 +184,30 @@ sub parse_cfdivisions_bundlesequence_token {
     my @allbs   = split(/#\s*\*cfdivisions_bundlesequence\s*=\s*/,$line);
     my $bsvalue = pop(@allbs) // ""; # get value side
     $bsvalue    =~ s/\s+//g; # remove spaces
-    my @bs;
+
+
+    # Extract bundles
+    my @bs=split /,/,$bsvalue;
+
+    # Add default namespace to bundles if namespace is not given
+    my @complete_bs = map {
+	my $bundle = $_;
+	if (! is_cfe_namespaced_identifier($bundle) ) {
+	    $bundle = $self->{default_namespace}.':'.$bundle;
+	} 
+	$bundle
+    } @bs;
+
+    # Validate bundles
+    my @validated_bs;
     eval {
-	@bs = map { 
-	    assert_cfengine_identifier($_);
-	} split(/,/,$bsvalue);
+	@validated_bs = map { assert_cfengine_identifier($_) } @complete_bs;
     };
     if ($@) {
 	croak("Parsing '*cfdivisions_bundlesequence' failed. $@");
     }
-    $self->{bundlesequences}->{$division} = \@bs;
+
+    $self->{bundlesequences}->{$division} = \@validated_bs;
     $self->{parsed_bundlesequence_token}  = 1;
 
     speak(" - parsed bundlesequence: ".join(',',@bs),$self->{verbose});

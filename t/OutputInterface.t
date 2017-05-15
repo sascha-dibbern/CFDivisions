@@ -57,7 +57,7 @@ subtest "Class strings" => sub {
 	);
 };
 
-subtest "Variable strings (default namespace)" => sub {
+subtest "Variable strings" => sub {
     my $oi=CFDivisions::OutputInterface->new(
 	%default_args,
 	);
@@ -67,7 +67,7 @@ subtest "Variable strings (default namespace)" => sub {
        "input_files_variable");
 
     is($oi->bundlesequence_variable(),
-       q/@cfdivisions_lib_bundlesequence={"default:bund_a","default:bund_b"}/,
+       q/@cfdivisions_lib_bundlesequence={"bund_a","bund_b"}/,
        "bundlesequence_variable");
 
     is(
@@ -107,7 +107,7 @@ subtest "Variable strings (default namespace)" => sub {
           '=lib_basedir=/basedir',
           '@lib_divisions={"a","b"}',
           '@cfdivisions_lib_inputs={"/root/lib/path_a/division-promises.cf","/root/lib/path_b/division-promises.cf"}',
-          '@cfdivisions_lib_bundlesequence={"default:bund_a","default:bund_b"}',
+          '@cfdivisions_lib_bundlesequence={"bund_a","bund_b"}',
           '=lib_localpath[a]=lib/path_a',
           '=lib_localpath[b]=lib/path_b',
           '=lib_path[a]=/root/lib/path_a',
@@ -117,17 +117,6 @@ subtest "Variable strings (default namespace)" => sub {
 	);
 };
 
-subtest "Variable strings (new namespace)" => sub {
-    my $oi=CFDivisions::OutputInterface->new(
-	%default_args,
-	namespace => 'other',
-	);
-
-    is($oi->bundlesequence_variable(),
-       q/@cfdivisions_lib_bundlesequence={"other:bund_a","other:bund_b"}/,
-       "bundlesequence_variable");
-};
-
 subtest "Variable strings (ignore bundles)" => sub {
     my $oi=CFDivisions::OutputInterface->new(
 	%default_args,
@@ -135,7 +124,7 @@ subtest "Variable strings (ignore bundles)" => sub {
 	);
 
     is($oi->bundlesequence_variable(),
-       q/@cfdivisions_lib_bundlesequence={"default:bund_a"}/,
+       q/@cfdivisions_lib_bundlesequence={"bund_a"}/,
        "bundlesequence_variable");
 };
 

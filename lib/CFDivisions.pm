@@ -37,13 +37,13 @@ sub new {
     $args{library} = 'division' unless defined $args{library};
 
     GetOptions (
-	"verbose"           => \$args{verbose},
-	"divisionfilter:s"  => \$args{divisionfilter},
-	"inputs_path:s"     => \$args{inputs_path},
-	"library:s"         => \$args{library},
-	"library_subdir:s"  => \$args{library_subdir},
-	"namespace:s"       => \$args{namespace},
-	"ignore_bundles:s"  => \$args{ignore_bundles},
+	"verbose"             => \$args{verbose},
+	"divisionfilter:s"    => \$args{divisionfilter},
+	"inputs_path:s"       => \$args{inputs_path},
+	"library=s"           => \$args{library},
+	"library_subdir:s"    => \$args{library_subdir},
+	"default_namespace:s" => \$args{default_namespace},
+	"ignore_bundles:s"    => \$args{ignore_bundles},
 	);
     
     # Default for divisionfilter is empty
@@ -55,19 +55,25 @@ sub new {
     # Transform arguments
     my $divisionfilter = [ split /\s*,\s*/,$args{divisionfilter} ];
     my $ignore_bundles = [ split /\s*,\s*/,$args{ignore_bundles} ];
+    
+    if (defined $args{default_namespace}) {
+	unless (is_cfe_identifier($args{default_namespace})) {
+	    croak("Argument '--default_namespace' contains an illegal CFEngine namespace identifier.");
+	}
+    }
 
     my $self  = {
-	verbose          => $args{verbose},
-	divisionfilter   => $divisionfilter,
-        ignore_bundles   => $ignore_bundles,
-	library          => $args{library},
-	library_subdir   => $args{library_subdir},
-	inputs_path      => $args{inputs_path},
-	namespace        => $args{namespace},
-	output           => [],
-	class_parser     => "CFDivisions::Parser",
-	class_model      => "CFDivisions::Model",
-	class_output     => "CFDivisions::OutputInterface",
+	verbose            => $args{verbose},
+	divisionfilter     => $divisionfilter,
+	ignore_bundles     => $ignore_bundles,
+	library            => $args{library},
+	library_subdir     => $args{library_subdir},
+	inputs_path        => $args{inputs_path},
+	default_namespace  => $args{default_namespace},
+	output             => [],
+	class_parser       => "CFDivisions::Parser",
+	class_model        => "CFDivisions::Model",
+	class_output       => "CFDivisions::OutputInterface",
     };
 
     bless $self, $class;
@@ -90,6 +96,7 @@ sub parser {
 	inputs_path         => $self->{inputs_path},
 	library             => $self->{library},
 	library_subdir      => $self->{library_subdir},
+	default_namespace   => $self->{default_namespace},
 	);
 
     $self->{parser} = $parser;
@@ -157,7 +164,6 @@ sub output_interface {
 	verbose        => $verbose,
 	parser         => $self->parser,
 	model          => $self->model,
-	namespace      => $self->{namespace},
         ignore_bundles => $self->{ignore_bundles},
 	);
 
