@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.231     2017-06-03 20:23:13+02:00 Europe/Copenhagen
+
 Bugfixes
 - Allow library loading in ~/.cfagent/modules/perl5
 - Iterate division when library is a symbolik link in filesystem
