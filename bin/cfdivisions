@@ -7,7 +7,13 @@ use strict;
 use warnings;
 use v5.14;
 
-use lib ('/var/cfengine/modules/perl5');
+# Path to CFEngine perl modules
+our $lib_path;
+BEGIN {
+    my @modules   = split /cfdivisions/,$0;
+    $lib_path = $modules[0].'perl5';
+}
+use lib ($lib_path);
 
 use CFDivisions;
 
