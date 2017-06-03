@@ -1,11 +1,17 @@
 {{$NEXT}}
 
+Bugfixes
+- Allow library loading in ~/.cfagent/modules/perl5
+- Iterate division when library is a symbolik link in filesystem
+
 0.221     2017-05-30 18:24:55+02:00 Europe/Copenhagen
+ 
 Improvement in concept documentation
 
 0.220     2017-05-15 16:29:33+02:00 Europe/Copenhagen
---namespace changes to --default_namespace:
-Division local bundlesequences can now explicit deviate in namespace-usage from a default setting
+
+- Arguement '--namespace' changes to '--default_namespace':
+  Division local bundlesequences can now explicit deviate in namespace-usage from a default setting
 
 0.210     2017-04-04 18:01:14+02:00 Europe/Copenhagen
 
