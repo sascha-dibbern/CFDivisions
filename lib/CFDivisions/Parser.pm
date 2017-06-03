@@ -29,7 +29,9 @@ sub new {
 
     # Override CFEngine input-folder behaviour ?
     my $inputs_path = $args{inputs_path} // $default_inputs_path;	
-    my ($inputs_vol,$inputs_dir) = File::Spec->splitpath( $inputs_path, 1 );
+
+    my ($inputs_vol,$inputs_dir) = 
+	File::Spec->splitpath( $inputs_path, 1 );
 
     my $self  = {
 	divisions                   => {},
@@ -48,13 +50,6 @@ sub new {
         default_namespace           => $args{default_namespace} // canonized_cfe_identifier($args{library}),
     };
 
-    # Defined 'basedir'
-    $self->{basedir} = File::Spec->catpath(
-	$self->{inputs_vol},
-	$self->{inputs_dir},
-	$self->{library_subdir},
-	);
-
     bless $self, $class;
     return $self;
 }
@@ -66,7 +61,21 @@ sub library {
 }
 
 sub basedir {
-    my $self  = shift;
+    my $self = shift;
+    
+    unless (defined $self->{basedir}) {
+	# Defined 'basedir'
+	my $basedir = File::Spec->catdir(
+	    $self->{inputs_vol},
+	    $self->{inputs_dir},
+	    $self->{library_subdir},
+	    '_' # placefolder to create '/'
+	    );
+
+	$basedir =~ s/_$//;
+	$self->{basedir} = $basedir;
+    }
+
     my $value = $self->{basedir};
     return $value;
 }
@@ -100,7 +109,7 @@ sub is_valid_division_promise_file_path {
     my $path = shift // croak("No path defined");
     my $file = shift // croak("No file defined");
 
-    my $basedir  = $self->{basedir};
+    my $basedir  = $self->basedir;
     my $rel_path = File::Spec->abs2rel( $path, $basedir ) ;
 
     # We do not allow breaking out from basedir
@@ -128,7 +137,8 @@ sub assert_no_empty_division_name {
     my $divname  = shift // croak("No division name defined");
     my $relpath  = shift // croak("No relative path defined");
     
-    croak("Illegal no-name division in path '$relpath'") if $divname eq "";
+    croak("Illegal no-name division in path '$relpath'")
+	if $divname eq "";
 }
 
 
@@ -137,9 +147,10 @@ sub register_division_promise_file {
     my $path = shift // croak("No path defined");
     my $file = shift // croak("No file defined");
 
-    return 0 unless $self->is_valid_division_promise_file_path($path,$file);
+    return 0 
+	unless $self->is_valid_division_promise_file_path($path,$file);
 
-    my $basedir  = $self->{basedir};
+    my $basedir  = $self->basedir;
     my $rel_path = File::Spec->abs2rel( $path, $basedir );
     my $divname  = canonized_cfe_identifier($rel_path);    
 
@@ -164,7 +175,7 @@ sub find_division_promise_files {
 	}
     };
 
-    find($handle_file, $self->{basedir});
+    find($handle_file, $self->basedir);
 
     my $verbose = $self->{verbose};
     speak("Division promise files found:",$verbose);
@@ -249,10 +260,15 @@ sub parse_promisefile_line {
     my $division = shift // croak("No division name defined");
 
     chomp $line;
-    return 0 unless $line =~ /#/; # only comment lines are parsed
+
+    return 0 
+	unless $line =~ /#/; # only comment lines are parsed
     
-    return 1 if $self->parse_cfdivisions_bundlesequence_token($line,$division);
-    return 1 if $self->parse_cfdivisions_depends_token($line,$division);
+    return 1 
+	if $self->parse_cfdivisions_bundlesequence_token($line,$division);
+
+    return 1 
+	if $self->parse_cfdivisions_depends_token($line,$division);
 }
 
 sub read_division_promise_file {
@@ -271,10 +287,14 @@ sub read_division_promise_file {
 
     speak("Read division ($division) from promise file ($path)",$self->{verbose});
 
-    open(my $fh,"<",$path) || croak("Could not open division promise file: $path");
+    open(my $fh,"<",$path) 
+	|| croak("Could not open division promise file: $path");
+
     while (<$fh>) {
 	# No need to go further if all things been parsed
-	last if $self->{parsed_bundlesequence_token} and $self->{parsed_depends_token};
+	last 
+	    if $self->{parsed_bundlesequence_token} and 
+	       $self->{parsed_depends_token};
 
 	eval {
 	    $self->parse_promisefile_line($_,$division);
@@ -298,7 +318,8 @@ sub read_division_promise_files {
 	add_error($@) if ($@);
     }
 
-    croak("Errors while parsing:\n".join("\n",errors())) if errors();
+    croak("Errors while parsing:\n".join("\n",errors())) 
+	if errors();
 }
 
 
