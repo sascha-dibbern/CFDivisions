@@ -19,7 +19,7 @@ subtest "Constructor" => sub {
     my $p=CFDivisions::Parser->new(library=>'test',inputs_path=>'/inputs');
     is($p->{inputs_vol},'',            "Attribute: inputs_vol");
     is($p->{inputs_dir},'/inputs',     "Attribute: inputs_dir");
-    is($p->{basedir},   '/inputs/test',"Attribute: basedir");
+    is($p->basedir(),   '/inputs/test/',"Attribute: basedir");
 };
 
 subtest "is_valid_division_promise_file_path" => sub {

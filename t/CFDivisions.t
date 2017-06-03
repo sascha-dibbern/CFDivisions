@@ -121,7 +121,7 @@ subtest "Integrationtest: Loading testlib1" => sub {
     is_deeply(
 	\@variables,
 	[
-          '=testlib1_basedir='.$scriptpath.'testlib1',
+          '=testlib1_basedir='.$scriptpath.'testlib1/',
           '@testlib1_divisions={"div1","div3","path1_div2"}',
           '@cfdivisions_testlib1_inputs={"'.
 	 $scriptpath.'testlib1/div1/division-promises.cf","'.
